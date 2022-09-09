@@ -4,33 +4,52 @@
  * https://reactnavigation.org/docs/configuring-links
  */
 
-import { LinkingOptions } from '@react-navigation/native';
-import * as Linking from 'expo-linking';
+import { LinkingOptions } from "@react-navigation/native";
+import * as Linking from "expo-linking";
 
-import { RootStackParamList } from '../types';
+import { RootStackParamList, AuthStackParamList } from "../types";
 
-const linking: LinkingOptions<RootStackParamList> = {
-  prefixes: [Linking.createURL('/')],
+export const authlinking: LinkingOptions<AuthStackParamList> = {
+  prefixes: [Linking.createURL("/")],
   config: {
     screens: {
-      Root: {
-        screens: {
-          TabOne: {
-            screens: {
-              TabOneScreen: 'one',
-            },
-          },
-          TabTwo: {
-            screens: {
-              TabTwoScreen: 'two',
-            },
-          },
-        },
-      },
-      Modal: 'modal',
-      NotFound: '*',
+      Onboarding: "onboarding",
+      Login: "login",
+      Register: "register",
     },
   },
 };
 
-export default linking;
+export const rootlinking: LinkingOptions<RootStackParamList> = {
+  prefixes: [Linking.createURL("/")],
+  config: {
+    screens: {
+      Root: {
+        screens: {
+          Store: {
+            screens: {
+              TabTwoScreen: "store",
+            },
+          },
+          Orders: {
+            screens: {
+              OrdersScreen: "orders",
+            },
+          },
+          QuickBill: {
+            screens: {
+              QuickScreen: "quick",
+            },
+          },
+          Profile: {
+            screens: {
+              ProfileScreen: "profile",
+            },
+          },
+        },
+      },
+      Modal: "modal",
+      NotFound: "*",
+    },
+  },
+};

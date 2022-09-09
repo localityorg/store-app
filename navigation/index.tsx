@@ -3,28 +3,55 @@
  * https://reactnavigation.org/docs/getting-started
  *
  */
-import { FontAwesome } from '@expo/vector-icons';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import * as React from 'react';
-import { ColorSchemeName, Pressable } from 'react-native';
+import { AntDesign, FontAwesome } from "@expo/vector-icons";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import {
+  NavigationContainer,
+  DefaultTheme,
+  DarkTheme,
+} from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import * as React from "react";
+import { ColorSchemeName, Pressable } from "react-native";
+import { Colors } from "react-native-ui-lib";
+import { useSelector } from "react-redux";
+import Sizes from "../constants/Sizes";
 
-import Colors from '../constants/Colors';
-import useColorScheme from '../hooks/useColorScheme';
-import ModalScreen from '../screens/ModalScreen';
-import NotFoundScreen from '../screens/NotFoundScreen';
-import TabOneScreen from '../screens/TabOneScreen';
-import TabTwoScreen from '../screens/TabTwoScreen';
-import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
-import LinkingConfiguration from './LinkingConfiguration';
+import Login from "../screens/Auth/Login";
+import Onboarding from "../screens/Auth/Onboarding";
+import Register from "../screens/Auth/Register";
+import Accounts from "../screens/Main/Accounts";
+import OrderDetails from "../screens/Main/OrderDetails";
 
-export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
+import Orders from "../screens/Main/Orders";
+import Profile from "../screens/Main/Profile";
+import QuickBill from "../screens/Main/QuickBill";
+import Store from "../screens/Main/Store";
+import StoreEdit from "../screens/Main/StoreEdit";
+
+import ModalScreen from "../screens/ModalScreen";
+import NotFoundScreen from "../screens/NotFoundScreen";
+
+import {
+  AuthStackParamList,
+  RootStackParamList,
+  RootTabParamList,
+  RootTabScreenProps,
+} from "../types";
+import { authlinking, rootlinking } from "./LinkingConfiguration";
+
+export default function Navigation({
+  colorScheme,
+}: {
+  colorScheme: ColorSchemeName;
+}) {
+  const { user } = useSelector((state: any) => state.userReducer);
   return (
     <NavigationContainer
-      linking={LinkingConfiguration}
-      theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <RootNavigator />
+      linking={!user ? rootlinking : authlinking}
+      theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+    >
+      {user ? <RootNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }
@@ -34,16 +61,53 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
  * https://reactnavigation.org/docs/modal
  */
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 
 function RootNavigator() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
-      <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
-      <Stack.Group screenOptions={{ presentation: 'modal' }}>
+      <Stack.Screen
+        name="Root"
+        component={BottomTabNavigator}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="NotFound"
+        component={NotFoundScreen}
+        options={{ title: "Oops!" }}
+      />
+      <Stack.Group
+        screenOptions={{ presentation: "modal", headerShown: false }}
+      >
         <Stack.Screen name="Modal" component={ModalScreen} />
+        <Stack.Screen name="OrderDetails" component={OrderDetails} />
+        <Stack.Screen name="Profile" component={Profile} />
+        <Stack.Screen name="Accounts" component={Accounts} />
+        <Stack.Screen name="StoreEdit" component={StoreEdit} />
       </Stack.Group>
     </Stack.Navigator>
+  );
+}
+
+function AuthNavigator() {
+  return (
+    <AuthStack.Navigator>
+      <AuthStack.Screen
+        name="Onboarding"
+        component={Onboarding}
+        options={{ headerShown: false }}
+      />
+      <AuthStack.Screen
+        name="Login"
+        component={Login}
+        options={{ title: "Login", headerShown: false }}
+      />
+      <AuthStack.Screen
+        name="Register"
+        component={Register}
+        options={{ title: "Register", headerShown: false }}
+      />
+    </AuthStack.Navigator>
   );
 }
 
@@ -54,42 +118,42 @@ function RootNavigator() {
 const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
-  const colorScheme = useColorScheme();
-
   return (
     <BottomTab.Navigator
-      initialRouteName="TabOne"
+      initialRouteName="Store"
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
-      }}>
+        tabBarActiveTintColor: Colors.primary,
+        headerShown: false,
+        tabBarShowLabel: false,
+        tabBarActiveBackgroundColor: Colors.$backgroundDefault,
+        tabBarInactiveBackgroundColor: Colors.$backgroundDefault,
+      }}
+    >
       <BottomTab.Screen
-        name="TabOne"
-        component={TabOneScreen}
-        options={({ navigation }: RootTabScreenProps<'TabOne'>) => ({
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Pressable
-              onPress={() => navigation.navigate('Modal')}
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.5 : 1,
-              })}>
-              <FontAwesome
-                name="info-circle"
-                size={25}
-                color={Colors[colorScheme].text}
-                style={{ marginRight: 15 }}
-              />
-            </Pressable>
+        name="Store"
+        component={Store}
+        options={({ navigation }: RootTabScreenProps<"Store">) => ({
+          title: "Store",
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="shoppingcart" color={color} />
           ),
         })}
       />
       <BottomTab.Screen
-        name="TabTwo"
-        component={TabTwoScreen}
+        name="Orders"
+        component={Orders}
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: "Orders",
+          lazy: false,
+          tabBarIcon: ({ color }) => <TabBarIcon name="bars" color={color} />,
+        }}
+      />
+      <BottomTab.Screen
+        name="QuickBill"
+        component={QuickBill}
+        options={{
+          title: "Quick Bill",
+          tabBarIcon: ({ color }) => <TabBarIcon name="qrcode" color={color} />,
         }}
       />
     </BottomTab.Navigator>
@@ -100,8 +164,14 @@ function BottomTabNavigator() {
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
  */
 function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
+  name: React.ComponentProps<typeof AntDesign>["name"];
   color: string;
 }) {
-  return <FontAwesome size={30} style={{ marginBottom: -3 }} {...props} />;
+  return (
+    <AntDesign
+      size={Sizes.icon.header}
+      style={{ marginBottom: -3 }}
+      {...props}
+    />
+  );
 }
