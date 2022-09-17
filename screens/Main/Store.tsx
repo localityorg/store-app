@@ -10,9 +10,19 @@ import TabHeader from "../../components/Store/TabHeader";
 import { Colors } from "react-native-ui-lib";
 
 import { RootTabScreenProps } from "../../types";
+import { useQuery } from "@apollo/client";
+import { GET_STORE } from "../../apollo/graphql/Store/store";
+import { useDispatch, useSelector } from "react-redux";
+import { setStore } from "../../redux/Store/actions";
+import { Text } from "../../components/Common/Text";
+import { View } from "../../components/Themed";
 
 export default function Store({ navigation }: RootTabScreenProps<"Store">) {
   const [refreshing, setRefreshing] = React.useState(false);
+
+  const { store } = useSelector((state: any) => state.storeReducer);
+
+  const dispatch: any = useDispatch();
 
   function refreshFeed() {
     return new Promise((resolve) => setTimeout(resolve, 2000));
@@ -22,11 +32,29 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
     refreshFeed().then(() => setRefreshing(false));
   }, []);
 
+  const { loading } = useQuery(GET_STORE, {
+    onCompleted(data) {
+      if (data.getStore) {
+        dispatch(setStore(data.getStore));
+      }
+    },
+  });
+
+  if (loading) {
+    return (
+      <Screen>
+        <View flex center>
+          <Text>Fetching store...</Text>
+        </View>
+      </Screen>
+    );
+  }
+
   return (
     <Screen>
       <TabHeader
         icon="user"
-        name="Store Superstore"
+        name={store.name || "Store Name"}
         logo={true}
         iconPress={() => navigation.navigate("Profile")}
         namePress={() => {}}

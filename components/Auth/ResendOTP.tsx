@@ -10,15 +10,13 @@ import Sizes from "../../constants/Sizes";
 
 interface ResendOTPProps {
   date: string;
-  newAcc: boolean;
-  contact: any;
-  setCode: any;
+  onNew: any;
 }
 
 export default function ResendOTP(props: ResendOTPProps) {
   // timer
   const [confirmTimer, setConfirmTimer] = useState<number>(1);
-  const [date, setDate] = useState(props.date);
+  const [date, setDate] = useState<string>("");
 
   // track of time, delivery
   const [timer, setTimer] = useState({
@@ -26,6 +24,10 @@ export default function ResendOTP(props: ResendOTPProps) {
     min: 0,
     sec: 0,
   });
+
+  useEffect(() => {
+    setDate(props.date);
+  }, [props.date]);
 
   useEffect(() => {
     confirmTimer > 0 &&
@@ -39,25 +41,7 @@ export default function ResendOTP(props: ResendOTPProps) {
       min: Math.abs(differenceInMinutes(expireTime, currentTime) % 60),
       sec: Math.abs(differenceInSeconds(expireTime, currentTime) % 60),
     });
-  }, [confirmTimer]);
-
-  // const [twoFactorAuth] = useLazyQuery(TWOFACTOR_AUTH, {
-  //   variables: {
-  //     contact: props.contact,
-  //     newAcc: props.newAcc,
-  //   },
-  //   fetchPolicy: "no-cache",
-  //   onCompleted(data) {
-  //     if (!data.twoFactorAuth.error) {
-  //       props.setCode();
-  //       setDate(data.twoFactorAuth.date);
-  //     }
-  //   },
-  //   onError(err) {
-  //     console.log(err);
-  //     process.env.NODE_ENV && console.log(err);
-  //   },
-  // });
+  }, [confirmTimer, date]);
 
   return (
     <View
@@ -68,17 +52,7 @@ export default function ResendOTP(props: ResendOTPProps) {
       }}
     >
       {timer.over ? (
-        <TouchableOpacity
-          onPress={() =>
-            // twoFactorAuth({
-            //   variables: {
-            //     contact: props.contact,
-            //     newAcc: props.newAcc,
-            //   },
-            // })
-            {}
-          }
-        >
+        <TouchableOpacity onPress={props.onNew}>
           <BoldText
             style={{
               textDecorationLine: "underline",

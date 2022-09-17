@@ -33,6 +33,7 @@ const authLink = setContext(async () => {
   return {
     headers: {
       Authorization: token ? `Bearer ${token}` : "",
+      source: `locale-store-${token || ""}`,
     },
   };
 });

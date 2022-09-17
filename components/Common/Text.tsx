@@ -6,7 +6,6 @@
 import { Colors, Text as DefaultText, TextProps } from "react-native-ui-lib";
 
 import { useFonts } from "expo-font";
-import AppLoading from "expo-app-loading";
 
 export function Text(props: TextProps) {
   const { style, ...otherProps } = props;
@@ -14,7 +13,7 @@ export function Text(props: TextProps) {
     Text: require("../../assets/fonts/Inter-Regular.ttf"),
   });
   if (!fontsLoaded) {
-    return <AppLoading />;
+    return null;
   } else {
     return (
       <DefaultText
@@ -31,7 +30,7 @@ export function BoldText(props: TextProps) {
     BoldText: require("../../assets/fonts/Inter-Bold.ttf"),
   });
   if (!fontsLoaded) {
-    return <AppLoading />;
+    return null;
   } else {
     return (
       <DefaultText

@@ -25,7 +25,7 @@ export const emptyCart = () => (dispatch: any) => {
 
 // set store
 export const SET_STORE = "SET_STORE";
-export const EDIT_STORE = "EDIT_STORE";
+export const REMOVE_STORE = "REMOVE_STORE";
 
 export const setStore = (store: any) => (dispatch: any) => {
   dispatch({
@@ -34,10 +34,9 @@ export const setStore = (store: any) => (dispatch: any) => {
   });
 };
 
-export const editStore = (store: any) => (dispatch: any) => {
+export const removeStore = () => (dispatch: any) => {
   dispatch({
-    type: EDIT_STORE,
-    payload: store,
+    type: REMOVE_STORE,
   });
 };
 

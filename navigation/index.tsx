@@ -48,7 +48,7 @@ export default function Navigation({
   const { user } = useSelector((state: any) => state.userReducer);
   return (
     <NavigationContainer
-      linking={!user ? rootlinking : authlinking}
+      linking={user ? authlinking : rootlinking}
       theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
     >
       {user ? <RootNavigator /> : <AuthNavigator />}

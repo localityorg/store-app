@@ -13,8 +13,7 @@ const STORE_FRAGMENT = gql`
       closed
     }
     address {
-      id
-      line
+      line1
       location {
         coordinates
       }

@@ -1,45 +1,31 @@
+import { useMutation } from "@apollo/client";
 import React, { useState } from "react";
-import {
-  View,
-  TextField,
-  Button,
-  Colors,
-  Dialog,
-  PanningProvider,
-  ActionSheet,
-} from "react-native-ui-lib";
-import { BoldText } from "../Common/Text";
-import { Text } from "../Themed";
+import { Alert } from "react-native";
+import { View } from "react-native-ui-lib";
+import { useDispatch } from "react-redux";
+import { LOGIN_USER } from "../../apollo/graphql/Common/user";
+import { setUser } from "../../redux/Common/actions";
 import ContactInput from "./ContactInput";
 
-interface AuthFormProps {}
+interface AuthFormProps {
+  onPress: any;
+  contact: {
+    ISD: string;
+    number: string;
+  };
+  setContact: any;
+}
 
 const AuthForm = (props: AuthFormProps): JSX.Element => {
-  const [contact, setContact] = useState({
-    ISD: "+91",
-    number: "",
-  });
-
   return (
     <View flex>
       <ContactInput
-        contact={contact}
-        setContact={(e: string) => setContact({ ...contact, number: e })}
+        contact={props.contact}
+        setContact={props.setContact}
         loading={false}
-        onNext={() => {}}
+        onNext={props.onPress}
         autoFocus={true}
         lock={false}
-      />
-      <ActionSheet
-        title={"Title"}
-        message={"Message goes here"}
-        cancelButtonIndex={3}
-        destructiveButtonIndex={0}
-        options={[
-          { label: "", onPress: () => {} },
-          { label: "", onPress: () => {} },
-          { label: "Cancel", onPress: () => console.log("cancel") },
-        ]}
       />
     </View>
   );

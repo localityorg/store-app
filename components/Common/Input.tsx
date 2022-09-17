@@ -5,7 +5,6 @@ import {
 } from "react-native";
 
 import { useFonts } from "expo-font";
-import AppLoading from "expo-app-loading";
 import { Colors } from "react-native-ui-lib";
 import { useState } from "react";
 import { View } from "../Themed";
@@ -21,7 +20,7 @@ export function TextInput(props: TextInputProps) {
   });
 
   if (!fontsLoaded) {
-    return <AppLoading />;
+    return null;
   } else {
     return (
       <DefaultTextInput

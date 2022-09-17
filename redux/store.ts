@@ -1,8 +1,7 @@
 import { createStore, combineReducers, applyMiddleware } from "redux";
 import thunk from "redux-thunk";
 
-import { userReducer } from "./Common/reducers/user";
-import { locationReducer } from "./Common/reducers/location";
+import { locationReducer, userReducer } from "./Common/reducers";
 
 import { cartReducer } from "./Store/reducers/cart";
 import { ordersReducer } from "./Store/reducers/orders";
@@ -11,9 +10,9 @@ import { accountsReducer } from "./Store/reducers/accounts";
 // import {deliveryReducer} from './Retail/reducers/delivery';
 
 const rootReducer = combineReducers({
+  cartReducer,
   userReducer,
   locationReducer,
-  cartReducer,
   storeReducer,
   ordersReducer,
   // deliveryReducer,

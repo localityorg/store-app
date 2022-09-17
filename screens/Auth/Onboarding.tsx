@@ -13,10 +13,10 @@ const Onboarding = ({
     <Screen>
       <OnboardCarousel />
       <Button
-        label={"Login"}
+        label={"Login with Phone"}
         disabled={false}
         size={Button.sizes.large}
-        backgroundColor={Colors.primary}
+        backgroundColor={Colors.$backgroundDarkElevated}
         disabledBackgroundColor={Colors.$iconDisabled}
         round={false}
         borderRadius={10}
@@ -25,12 +25,12 @@ const Onboarding = ({
         onPress={() => navigation.navigate("Login")}
       />
       <Button
-        label={"Register"}
+        label={"New User? Register"}
         disabled={false}
         size={Button.sizes.large}
         backgroundColor={Colors.transparent}
         labelStyle={{
-          color: Colors.$textPrimary,
+          color: Colors.$textDefault,
         }}
         disabledBackgroundColor={Colors.$iconDisabled}
         round={false}

@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import useColorScheme from "../../hooks/useColorScheme";
 import * as Location from "expo-location";
-import { CommonStyles } from "./Styles";
 import { View } from "../Themed";
 import { BoldText } from "./Text";
 import { lightMapStyle } from "../../constants/MapStyle";
@@ -41,10 +40,10 @@ export function Map(props: MapProps) {
       if (status === "granted") {
         let location = await Location.getCurrentPositionAsync({});
         dispatch(
-          setUserLocation({
-            latitude: location.coords.latitude.toString(),
-            longitude: location.coords.longitude.toString(),
-          })
+          setUserLocation([
+            location.coords.latitude.toString(),
+            location.coords.longitude.toString(),
+          ])
         );
       }
     })();
@@ -103,8 +102,8 @@ export function Map(props: MapProps) {
       <MapView
         ref={mapRef}
         initialRegion={{
-          latitude: parseFloat(location?.latitude),
-          longitude: parseFloat(location?.longitude),
+          latitude: parseFloat(location[0]),
+          longitude: parseFloat(location[1]),
           latitudeDelta: 0.0011,
           longitudeDelta: 0.0018,
         }}
@@ -115,10 +114,7 @@ export function Map(props: MapProps) {
         style={{ flex: 1, zIndex: 999 }}
         onRegionChangeComplete={(e) => {
           dispatch(
-            setUserLocation({
-              latitude: e.latitude.toString(),
-              longitude: e.longitude.toString(),
-            })
+            setUserLocation([e.latitude.toString(), e.longitude.toString()])
           );
         }}
       >
