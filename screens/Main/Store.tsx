@@ -13,41 +13,43 @@ import { RootTabScreenProps } from "../../types";
 import { useQuery } from "@apollo/client";
 import { GET_STORE } from "../../apollo/graphql/Store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { setStore } from "../../redux/Store/actions";
+import { setOrders, setStore } from "../../redux/Store/actions";
 import { Text } from "../../components/Common/Text";
 import { View } from "../../components/Themed";
+import { GET_ORDERS } from "../../apollo/graphql/Store/orders";
 
 export default function Store({ navigation }: RootTabScreenProps<"Store">) {
   const [refreshing, setRefreshing] = React.useState(false);
 
   const { store } = useSelector((state: any) => state.storeReducer);
+  const { orders } = useSelector((state: any) => state.ordersReducer);
 
   const dispatch: any = useDispatch();
 
-  function refreshFeed() {
-    return new Promise((resolve) => setTimeout(resolve, 2000));
-  }
-  const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
-    refreshFeed().then(() => setRefreshing(false));
-  }, []);
-
-  const { loading } = useQuery(GET_STORE, {
+  const { loading: fetchingStore, refetch } = useQuery(GET_STORE, {
     onCompleted(data) {
+      console.log(data);
       if (data.getStore) {
         dispatch(setStore(data.getStore));
       }
     },
+    onError(error) {
+      console.log({ ...error });
+    },
   });
 
-  if (loading) {
+  if (fetchingStore) {
     return (
       <Screen>
         <View flex center>
-          <Text>Fetching store...</Text>
+          <Text>Fetching store details...</Text>
         </View>
       </Screen>
     );
+  }
+
+  if (!store) {
+    return null;
   }
 
   return (
@@ -64,8 +66,8 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
         refreshing={refreshing}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
+            refreshing={fetchingStore}
+            onRefresh={() => refetch()}
             tintColor={Colors.$iconPrimary}
           />
         }
@@ -74,7 +76,13 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
         keyExtractor={(item: number) => item.toString()}
         renderItem={() => (
           <>
-            <Stats amount="1234.55" count={10} pending={2} />
+            {store.stat && (
+              <Stats
+                amount={store.stat.amount || "0.0"}
+                count={store.stat.count}
+                pending={2}
+              />
+            )}
             {/* <LinearGradient
               colors={[
                 Colors.$iconDanger + "00",
@@ -114,11 +122,15 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
             </LinearGradient> */}
             <Section
               title="Pending Orders"
-              subtitle="Once accepted, view in Orders tab"
+              subtitle={
+                orders.length === 0
+                  ? "You have no pending orders, go to Orders tab"
+                  : "Once accepted, view in Orders tab"
+              }
               body={
                 <FlatList
-                  data={[1, 2, 3]}
-                  keyExtractor={(item: number) => item.toString()}
+                  data={orders}
+                  keyExtractor={(item: any) => item.id.toString()}
                   renderItem={() => (
                     <OrderCard
                       id="344535loc"

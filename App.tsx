@@ -9,7 +9,6 @@ import { Provider } from "react-redux";
 import { Store } from "./redux/store";
 
 // handling auth
-import { AuthProvider } from "./redux/Common/reducers/auth";
 import { ApolloProvider } from "@apollo/client";
 import { client } from "./apollo/Provider";
 
@@ -23,12 +22,10 @@ export default function App() {
     return (
       <SafeAreaProvider>
         <ApolloProvider client={client}>
-          <AuthProvider>
-            <Provider store={Store}>
-              <Navigation colorScheme={colorScheme} />
-              <StatusBar />
-            </Provider>
-          </AuthProvider>
+          <Provider store={Store}>
+            <Navigation colorScheme={colorScheme} />
+            <StatusBar />
+          </Provider>
         </ApolloProvider>
       </SafeAreaProvider>
     );

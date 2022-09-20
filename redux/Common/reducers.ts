@@ -43,7 +43,7 @@ getValueFor("jwtToken").then((data) => {
   }
 });
 
-export function userReducer(state = userReducer, action: any) {
+export function userReducer(state = userState, action: any) {
   switch (action.type) {
     case SET_USER:
       return { ...state, store: action.payload };

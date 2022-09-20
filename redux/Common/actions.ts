@@ -1,7 +1,7 @@
 // set inventory
 export const SET_LOCATION = "SET_LOCATION";
 
-export const setInventory = (location: [string, string]) => (dispatch: any) => {
+export const setLocation = (location: [string, string]) => (dispatch: any) => {
   dispatch({
     type: SET_LOCATION,
     payload: location,

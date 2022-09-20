@@ -1,16 +1,18 @@
 import React, { useState } from "react";
 import { ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
 import { Colors } from "react-native-ui-lib";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Header } from "../../components/Common/Header";
 import Screen from "../../components/Common/Screen";
 import { BoldText, Text } from "../../components/Common/Text";
 import { View } from "../../components/Themed";
 import { parseISO } from "date-fns";
 
-import { RootTabScreenProps } from "../../types";
+import { RootStackScreenProps } from "../../types";
 
 import Sizes from "../../constants/Sizes";
+import { useQuery } from "@apollo/client";
+import { GET_STORE_ACCOUNTS } from "../../apollo/graphql/Store/store";
 
 interface StatsProps {
   amount: string;
@@ -55,7 +57,7 @@ export interface AccountDataProps {
 }
 
 export interface AccountScreenProps {
-  data: [AccountDataProps];
+  data: Array<[AccountDataProps]>;
   totalPending: {
     count: number;
     amount: string;
@@ -146,12 +148,31 @@ export const AccountTile = (props: AccountDataProps): JSX.Element => {
 
 export default function Accounts({
   navigation,
-}: RootTabScreenProps<"Accounts">) {
-  const [active, setActive] = useState<AccountDataProps | null>(null);
+}: RootStackScreenProps<"Accounts">) {
+  const dispatch: any = useDispatch();
 
-  const { accounts, totalPending } = useSelector(
-    (state: any) => state.accountsReducer
-  );
+  const [active, setActive] = useState<AccountDataProps | null>(null);
+  const [accounts, setAccounts] = useState([]);
+
+  const { totalPending } = useSelector((state: any) => state.accountsReducer);
+
+  const { loading: fetchingAccounts } = useQuery(GET_STORE_ACCOUNTS, {
+    onCompleted(data) {
+      if (data.getStore) {
+        setAccounts(data.getStore.accounts);
+        var pending = {
+          total: 0,
+          count: 0,
+        };
+        data.getStore.accounts.forEach((item: any) => {
+          if (!item.closed) {
+            pending.total += parseFloat(item.pending.amount);
+            pending.count += 1;
+          }
+        });
+      }
+    },
+  });
 
   if (active) {
     return (
@@ -161,7 +182,7 @@ export default function Accounts({
     );
   }
 
-  if (!accounts) {
+  if (fetchingAccounts) {
     return (
       <Screen>
         <Header
@@ -184,19 +205,8 @@ export default function Accounts({
       <Stats amount={totalPending.amount} count={totalPending.count} />
       <View flex>
         <FlatList
-          data={[
-            {
-              id: "34234",
-              name: "Vatsal Pandya",
-              lastUpdated: new Date().toISOString(),
-              closed: false,
-              pending: {
-                status: false,
-                amount: "1134",
-              },
-            },
-          ]}
-          keyExtractor={(item) => item.id.toString()}
+          data={accounts}
+          keyExtractor={(item: any) => item.id.toString()}
           renderItem={({ item }) => (
             <AccountTile
               {...item}

@@ -7,7 +7,7 @@ import {
   View,
 } from "react-native-ui-lib";
 import { Header } from "../../components/Common/Header";
-import { InputText } from "../../components/Common/Input";
+import { InputText, TextInput } from "../../components/Common/Input";
 import { Map } from "../../components/Common/Map";
 import { Text } from "../../components/Common/Text";
 
@@ -16,32 +16,27 @@ import Sizes from "../../constants/Sizes";
 
 import { AntDesign } from "@expo/vector-icons";
 import { Keyboard } from "react-native";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useMutation } from "@apollo/client";
+import { EDIT_STORE, REGISTER_STORE } from "../../apollo/graphql/Store/store";
+import { setStore } from "../../redux/Store/actions";
 
 interface DetailProps {
-  location?: {
-    address: string;
-    coordinates: {
-      latitude: string;
-      longitude: string;
-    };
-    pincode: string;
-  };
+  onNext?: any;
 }
 
 const StoreDetails = (props: DetailProps): JSX.Element => {
-  const [location, setLocation] = useState<any | null>({
-    latitude: "",
-    longitude: "",
-  });
+  const dispatch: any = useDispatch();
 
-  const { location: locationState } = useSelector(
+  const [active, setActive] = useState<boolean>(false);
+  const { location: storeLocation } = useSelector(
     (state: any) => state.locationReducer
   );
+  const { store } = useSelector((state: any) => state.storeReducer);
+  const { user } = useSelector((state: any) => state.userReducer);
 
   const [locationSet, setLocationSet] = useState<boolean>(false);
 
-  const [status, setStatus] = useState(false);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
@@ -64,99 +59,143 @@ const StoreDetails = (props: DetailProps): JSX.Element => {
     };
   }, []);
 
-  const [storeInfo, setStoreInfo] = useState({
-    name: "",
-    licenseNumber: "",
-    location: {
-      address: props.location?.address || "",
-      coordinates: props.location?.coordinates || location,
-      pincode: props.location?.pincode || "",
-    },
-    meta: {
-      verified: false,
+  const [data, setData] = useState({
+    edit: true,
+    storeInfo: {
+      name: store.name,
+      contact: user.contact,
+      address: {
+        line1: store.address.line,
+        location: {
+          coordinates: store.address.location.coordinates,
+        },
+      },
     },
   });
 
-  useEffect(() => {
-    if (locationState) {
-      setLocation(locationState);
+  const [editStore, { loading: confirming }] = useMutation(
+    data.edit ? EDIT_STORE : REGISTER_STORE,
+    {
+      variables: {
+        edit: data.edit,
+        storeInfo: {
+          name: data.storeInfo.name,
+          contact: user.contact,
+          address: data.storeInfo.address,
+        },
+      },
+      onCompleted(data) {
+        if (data.editStore) {
+          dispatch(setStore(data.editStore));
+          {
+            props.onNext && props.onNext();
+          }
+        }
+      },
+      onError(error) {
+        console.log({ ...error });
+      },
     }
-  }, [locationState]);
+  );
 
-  if (status) {
+  if (confirming) {
     return (
       <Screen>
-        <Header title="" onBack={() => setStatus(false)} />
-        <Text grey70>Confirming store StoreDetailsation ...</Text>
+        <Text grey70>
+          Confirming store {data.edit ? "changes" : "registeration"}...
+        </Text>
       </Screen>
     );
   }
 
-  if (!locationSet) {
+  if (locationSet) {
     return (
       <>
         <View flex>
-          <Text grey70>
+          <Text style={{ fontSize: Sizes.font.text }}>
             Enter your store address below. Drag marker to point precise store
             location.
           </Text>
+
           <View
             style={{
-              marginVertical: 7,
+              width: "100%",
               flexDirection: "row",
               alignItems: "center",
-              justifyContent: "space-between",
+              marginVertical: 10,
+              padding: 10,
+              borderRadius: 5,
+              borderWidth: 1,
+              borderColor: active
+                ? Colors.$backgroundDarkElevated
+                : Colors.$backgroundDisabled,
             }}
           >
-            <Incubator.TextField
-              placeholder="Enter Adddress"
-              floatingPlaceholder
-              containerStyle={{
-                flex: 1,
-              }}
+            <TextInput
+              autoFocus={true}
+              value={data.storeInfo.address.line1}
               onChangeText={(text: string) =>
-                setStoreInfo({
-                  ...storeInfo,
-                  location: { ...storeInfo.location, address: text },
+                setData({
+                  ...data,
+                  storeInfo: {
+                    ...data.storeInfo,
+                    address: {
+                      ...data.storeInfo.address,
+                      line1: text,
+                    },
+                  },
                 })
               }
-              enableErrors
-              floatingPlaceholderColor={{
-                focus: Colors.$textPrimary,
-                default: Colors.$textDefault,
-              }}
-              floatOnFocus={true}
-              validate={["required", (value: string) => value.length > 3]}
-              validationMessage={["Field is required", "Address is too short"]}
-              autoFocus
-              fieldStyle={{
-                borderBottomWidth: 1,
-                borderColor: Colors.$outlineDisabledHeavy,
-                paddingBottom: 4,
-              }}
+              onBlur={() => setActive(false)}
+              onFocus={() => setActive(true)}
+              style={{ flex: 1 }}
+              placeholder="Store Address"
             />
             {isKeyboardVisible && (
-              <TouchableOpacity marginL-15 onPress={() => Keyboard.dismiss()}>
+              <TouchableOpacity
+                marginL-15
+                disabled={data.storeInfo.address.line1.trim().length <= 0}
+                onPress={() => Keyboard.dismiss()}
+              >
                 <AntDesign
                   name="arrowright"
-                  color={Colors.$iconDefault}
+                  color={
+                    data.storeInfo.address.line1.trim().length <= 0
+                      ? Colors.$backgroundDisabled
+                      : Colors.$backgroundDarkElevated
+                  }
                   size={Sizes.icon.normal}
                 />
               </TouchableOpacity>
             )}
           </View>
           {!isKeyboardVisible && <Map />}
-          {location && !isKeyboardVisible && (
+          {storeLocation && !isKeyboardVisible && (
             <Button
-              label={"Confirm Store location"}
-              disabled={false}
+              label={
+                confirming
+                  ? `${data.edit ? "Editing" : "Registering..."}`
+                  : `Confirm ${data.edit ? "Edit" : "& Register"}`
+              }
+              disabled={confirming}
               size={Button.sizes.large}
               backgroundColor={Colors.primary}
               disabledBackgroundColor={Colors.$iconDisabled}
               round={false}
               borderRadius={10}
               marginV-10
-              onPress={() => setLocationSet(true)}
+              onPress={() =>
+                editStore({
+                  variables: {
+                    edit: data.edit,
+                    storeInfo: {
+                      name: data.storeInfo.name,
+                      address: data.storeInfo.address,
+                      contact: user.contact,
+                    },
+                  },
+                })
+              }
             />
           )}
         </View>
@@ -167,38 +206,76 @@ const StoreDetails = (props: DetailProps): JSX.Element => {
   return (
     <>
       <View flex>
-        <Text grey70>Enter your store details below.</Text>
+        <Text style={{ fontSize: Sizes.font.text }}>
+          Enter your store details below.
+        </Text>
+        {/* <InputText
+            value={storeInfo.licenseNumber}
+            onChange={(text: string) =>
+              setStoreInfo({ ...storeInfo, licenseNumber: text })
+            }
+            placeholder="Raj Maharaj"
+            title="Your Name"
+            autoFocus={true}
+          />
+  
+          <View
+            style={{
+              marginVertical: 10,
+              height: 1,
+              width: "80%",
+              alignSelf: "center",
+              backgroundColor: Colors.$backgroundPrimaryHeavy,
+            }}
+          /> */}
 
-        <InputText
-          value={storeInfo.name}
-          onChange={(text: string) =>
-            setStoreInfo({ ...storeInfo, name: text })
+        <TextInput
+          value={data.storeInfo.name}
+          onChangeText={(text: string) =>
+            setData({
+              ...data,
+              storeInfo: {
+                ...data.storeInfo,
+                name: text,
+              },
+            })
           }
-          title="Store Name"
-          placeholder="Maharaja Superstore"
-          autoFocus={true}
+          onBlur={() => setActive(false)}
+          onFocus={() => setActive(true)}
+          style={{
+            borderWidth: 1,
+            borderColor: active
+              ? Colors.$backgroundDarkElevated
+              : Colors.$backgroundDisabled,
+            padding: 10,
+            marginVertical: 10,
+            borderRadius: 5,
+          }}
+          placeholder="Store Name"
         />
-        <InputText
-          value={storeInfo.licenseNumber}
-          onChange={(text: string) =>
-            setStoreInfo({ ...storeInfo, licenseNumber: text })
-          }
-          placeholder="ISC000000000"
-          title="License Number"
-          autoFocus={true}
-        />
+        {/* <InputText
+                value={storeData.storeInfo.}
+                onChange={(text: string) =>
+                  setStoreInfo({ ...storeInfo, licenseNumber: text })
+                }
+                placeholder="ISC000000000"
+                title="License Number"
+                autoFocus={true}
+              /> */}
       </View>
       <Button
-        label={"Confirm Details"}
-        disabled={true}
+        label={"Select Address"}
+        disabled={data.storeInfo.name.trim().length <= 0}
         size={Button.sizes.large}
-        backgroundColor={Colors.primary}
+        backgroundColor={Colors.$backgroundDarkElevated}
         disabledBackgroundColor={Colors.$iconDisabled}
         round={false}
         borderRadius={10}
-        marginT-50
-        marginB-10
-        onPress={() => {}}
+        marginV-10
+        onPress={() => {
+          setActive(false);
+          setLocationSet(true);
+        }}
       />
     </>
   );

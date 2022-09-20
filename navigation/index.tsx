@@ -46,9 +46,10 @@ export default function Navigation({
   colorScheme: ColorSchemeName;
 }) {
   const { user } = useSelector((state: any) => state.userReducer);
+
   return (
     <NavigationContainer
-      linking={user ? authlinking : rootlinking}
+      linking={user ? rootlinking : authlinking}
       theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
     >
       {user ? <RootNavigator /> : <AuthNavigator />}
@@ -80,7 +81,13 @@ function RootNavigator() {
         screenOptions={{ presentation: "modal", headerShown: false }}
       >
         <Stack.Screen name="Modal" component={ModalScreen} />
-        <Stack.Screen name="OrderDetails" component={OrderDetails} />
+        <Stack.Screen
+          name="OrderDetails"
+          component={OrderDetails}
+          initialParams={{
+            id: "" || null,
+          }}
+        />
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="Accounts" component={Accounts} />
         <Stack.Screen name="StoreEdit" component={StoreEdit} />

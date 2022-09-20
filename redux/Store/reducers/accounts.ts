@@ -4,7 +4,7 @@ var accountState = {
   accounts: [],
   totalPending: {
     count: 0,
-    amount: "1134",
+    amount: "0",
   },
 };
 

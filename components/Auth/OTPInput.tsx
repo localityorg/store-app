@@ -33,6 +33,7 @@ export function OTPInput(props: OTPProps) {
     },
     fetchPolicy: "no-cache",
     onCompleted(data) {
+      console.log(data);
       if (!data.checkAuth.error) {
         props.onNext();
       }

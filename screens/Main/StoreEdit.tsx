@@ -4,15 +4,13 @@ import { Header } from "../../components/Common/Header";
 import Screen from "../../components/Common/Screen";
 import { Text } from "../../components/Common/Text";
 import StoreDetails from "../../components/Store/StoreDetails";
-
-import { RootTabScreenProps } from "../types";
+import { RootStackScreenProps } from "../../types";
 
 export default function StoreEdit({
   navigation,
-}: RootTabScreenProps<"StoreEdit">) {
+}: RootStackScreenProps<"StoreEdit">) {
   const [editing, setEditing] = useState(true);
   const [changed, setChanged] = useState(false);
-  const { store } = useSelector((state: any) => state.storeReducer);
 
   if (editing) {
     return (
@@ -26,7 +24,11 @@ export default function StoreEdit({
             }
           }}
         />
-        <StoreDetails location={store?.address} />
+        <StoreDetails
+          onNext={() => {
+            navigation.navigate("Profile");
+          }}
+        />
       </Screen>
     );
   }

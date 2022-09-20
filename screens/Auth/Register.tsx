@@ -9,15 +9,15 @@ import Screen from "../../components/Common/Screen";
 import { Text } from "../../components/Common/Text";
 import Sizes from "../../constants/Sizes";
 
-import { Keyboard } from "react-native";
+import { Alert, Keyboard } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { AuthStackScreenProps } from "../../types";
 import ContactInput from "../../components/Auth/ContactInput";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { EDIT_STORE } from "../../apollo/graphql/Store/store";
-import { setStore } from "../../redux/Store/actions";
 import { OTPInput } from "../../components/Auth/OTPInput";
-import { CHECK_AUTH, TWOFACTOR_AUTH } from "../../apollo/graphql/Common/auth";
+import { TWOFACTOR_AUTH } from "../../apollo/graphql/Common/auth";
+import { setLocation, setUser } from "../../redux/Common/actions";
 
 export default function Register({
   navigation,
@@ -32,8 +32,10 @@ export default function Register({
   });
   const [active, setActive] = useState<boolean>(false);
 
-  const [secureCode, setSecureCode] = useState<string>("");
-  const [location, setLocation] = useState<any | null>([]);
+  const [error, setError] = useState({
+    error: false,
+    message: "",
+  });
 
   const [locationPermission, setLocationPermission] = useState<string | null>(
     null
@@ -70,11 +72,10 @@ export default function Register({
     number: "",
   });
 
-  const [data, setData] = useState({
-    id: null,
+  const [storeData, setStoreData] = useState({
+    edit: false,
     storeInfo: {
       name: "",
-      contact,
       address: {
         line1: "",
         location: {
@@ -86,8 +87,10 @@ export default function Register({
 
   // good manners
   useEffect(() => {
-    askForLocationPermission();
-  }, []);
+    if (storeLocation === null) {
+      askForLocationPermission();
+    }
+  }, [storeLocation]);
 
   // init good manners
   const askForLocationPermission = () => {
@@ -98,31 +101,32 @@ export default function Register({
 
       if (status === "granted") {
         let location = await Location.getCurrentPositionAsync({});
-        setLocation([
-          location.coords.latitude.toString(),
-          location.coords.longitude.toString(),
-        ]);
+        dispatch(
+          setLocation([
+            location.coords.latitude.toString(),
+            location.coords.longitude.toString(),
+          ])
+        );
       }
     })();
   };
 
-  const [register, { loading: registering }] = useMutation(EDIT_STORE, {
+  const [editStore, { loading: registering }] = useMutation(EDIT_STORE, {
     variables: {
-      id: data.id,
-      storeInfo: { ...data.storeInfo, contact },
+      edit: storeData.edit,
+      storeInfo: {
+        name: storeData.storeInfo.name,
+        contact: contact,
+        address: storeData.storeInfo.address,
+      },
     },
-    fetchPolicy: "no-cache",
     onCompleted(data) {
       if (data.editStore) {
-        dispatch(setStore(data.editStore));
+        dispatch(setUser(data.editStore));
       }
     },
     onError(error) {
-      console.log({
-        id: data.id,
-        storeInfo: data.storeInfo,
-      });
-      console.log(error);
+      console.log({ ...error });
     },
   });
 
@@ -132,23 +136,18 @@ export default function Register({
       newAcc: true,
     },
     fetchPolicy: "no-cache",
-    onCompleted(data) {
-      if (data.twoFactorAuth) {
-        setMeta({ ...meta, tfaScreen: true, date: data.twoFactorAuth.date });
-      }
-    },
-  });
-
-  const [checkAuth, { loading: checkingAuth }] = useLazyQuery(CHECK_AUTH, {
-    variables: {
-      contact,
-      secureCode,
-    },
-    fetchPolicy: "no-cache",
-    onCompleted(data) {
-      console.log(data);
-      if (!data.checkAuth.error) {
-        setMeta({ ...meta, registerScreen: true, mapScreen: false });
+    onCompleted(storeData) {
+      if (storeData.twoFactorAuth.error) {
+        setError({
+          error: storeData.twoFactorAuth.error,
+          message: storeData.twoFactorAuth.message,
+        });
+      } else {
+        setMeta({
+          ...meta,
+          tfaScreen: true,
+          date: storeData.twoFactorAuth.date,
+        });
       }
     },
   });
@@ -159,13 +158,13 @@ export default function Register({
         <Header
           title="Store Info"
           onBack={() => {
-            setData({
-              ...data,
+            setStoreData({
+              ...storeData,
               storeInfo: {
-                ...data.storeInfo,
+                ...storeData.storeInfo,
                 name: "",
                 address: {
-                  ...data.storeInfo.address,
+                  ...storeData.storeInfo.address,
                   line1: "",
                 },
               },
@@ -197,14 +196,14 @@ export default function Register({
               >
                 <TextInput
                   autoFocus={true}
-                  value={data.storeInfo.address.line1}
+                  value={storeData.storeInfo.address.line1}
                   onChangeText={(text: string) =>
-                    setData({
-                      ...data,
+                    setStoreData({
+                      ...storeData,
                       storeInfo: {
-                        ...data.storeInfo,
+                        ...storeData.storeInfo,
                         address: {
-                          ...data.storeInfo.address,
+                          ...storeData.storeInfo.address,
                           line1: text,
                         },
                       },
@@ -218,13 +217,15 @@ export default function Register({
                 {isKeyboardVisible && (
                   <TouchableOpacity
                     marginL-15
-                    disabled={data.storeInfo.address.line1.trim().length <= 0}
+                    disabled={
+                      storeData.storeInfo.address.line1.trim().length <= 0
+                    }
                     onPress={() => Keyboard.dismiss()}
                   >
                     <AntDesign
                       name="arrowright"
                       color={
-                        data.storeInfo.address.line1.trim().length <= 0
+                        storeData.storeInfo.address.line1.trim().length <= 0
                           ? Colors.$backgroundDisabled
                           : Colors.$backgroundDarkElevated
                       }
@@ -239,12 +240,12 @@ export default function Register({
                     flex: 1,
                   }}
                   onChangeText={(text: string) =>
-                    setData({
-                      ...data,
+                    setStoreData({
+                      ...storeData,
                       storeInfo: {
-                        ...data.storeInfo,
+                        ...storeData.storeInfo,
                         address: {
-                          ...data.storeInfo.address,
+                          ...storeData.storeInfo.address,
                           line1: text,
                         },
                       },
@@ -270,10 +271,10 @@ export default function Register({
                 /> */}
               </View>
               {!isKeyboardVisible && <Map />}
-              {location && !isKeyboardVisible && (
+              {storeLocation && !isKeyboardVisible && (
                 <Button
-                  label={"Confirm & Register"}
-                  disabled={false}
+                  label={registering ? "Registering..." : "Confirm & Register"}
+                  disabled={registering}
                   size={Button.sizes.large}
                   backgroundColor={Colors.primary}
                   disabledBackgroundColor={Colors.$iconDisabled}
@@ -281,10 +282,14 @@ export default function Register({
                   borderRadius={10}
                   marginV-10
                   onPress={() =>
-                    register({
+                    editStore({
                       variables: {
-                        id: data.id,
-                        storeInfo: { ...data.storeInfo, contact: contact },
+                        edit: storeData.edit,
+                        storeInfo: {
+                          name: storeData.storeInfo.name,
+                          address: storeData.storeInfo.address,
+                          contact,
+                        },
                       },
                     })
                   }
@@ -319,12 +324,12 @@ export default function Register({
           /> */}
 
               <TextInput
-                value={data.storeInfo.name}
+                value={storeData.storeInfo.name}
                 onChangeText={(text: string) =>
-                  setData({
-                    ...data,
+                  setStoreData({
+                    ...storeData,
                     storeInfo: {
-                      ...data.storeInfo,
+                      ...storeData.storeInfo,
                       name: text,
                     },
                   })
@@ -343,7 +348,7 @@ export default function Register({
                 placeholder="Store Name"
               />
               {/* <InputText
-                value={data.storeInfo.}
+                value={storeData.storeInfo.}
                 onChange={(text: string) =>
                   setStoreInfo({ ...storeInfo, licenseNumber: text })
                 }
@@ -354,7 +359,7 @@ export default function Register({
             </View>
             <Button
               label={"Select Address"}
-              disabled={data.storeInfo.name.trim().length <= 0}
+              disabled={storeData.storeInfo.name.trim().length <= 0}
               size={Button.sizes.large}
               backgroundColor={Colors.$backgroundDarkElevated}
               disabledBackgroundColor={Colors.$iconDisabled}
@@ -378,7 +383,6 @@ export default function Register({
         <Header
           title="Register"
           onBack={() => {
-            setSecureCode("");
             setMeta({ ...meta, tfaScreen: false });
           }}
         />
@@ -386,8 +390,7 @@ export default function Register({
           Enter 6 digit code sent to your registered number.
         </Text>
         <OTPInput
-          secureCode={secureCode}
-          setSecureCode={setSecureCode}
+          contact={contact}
           date={meta.date}
           onNew={() =>
             tfAuth({
@@ -398,12 +401,7 @@ export default function Register({
             })
           }
           onNext={() =>
-            checkAuth({
-              variables: {
-                contact,
-                secureCode,
-              },
-            })
+            setMeta({ ...meta, registerScreen: true, mapScreen: false })
           }
         />
       </Screen>
@@ -432,13 +430,14 @@ export default function Register({
         Join with an unregistered mobile number.
       </Text>
       <ContactInput
+        error={error}
         contact={contact}
         loading={tfAuthing}
         onNext={() =>
           tfAuth({
             variables: {
               contact,
-              newAcc: false,
+              newAcc: true,
             },
           })
         }

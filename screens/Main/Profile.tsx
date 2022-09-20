@@ -1,27 +1,36 @@
 import { AntDesign } from "@expo/vector-icons";
 import React from "react";
 import { Colors } from "react-native-ui-lib";
+import { useDispatch, useSelector } from "react-redux";
 import Button from "../../components/Common/Button";
 import { Header } from "../../components/Common/Header";
 import Screen from "../../components/Common/Screen";
 import { Section } from "../../components/Common/Section";
 import { BoldText, Text } from "../../components/Common/Text";
-import TabHeader from "../../components/Store/TabHeader";
 import { View } from "../../components/Themed";
 import useColorScheme from "../../hooks/useColorScheme";
+import { removeUser } from "../../redux/Common/actions";
+import { setStore } from "../../redux/Store/actions";
 
-import { RootTabScreenProps } from "../../types";
+import { RootStackScreenProps } from "../../types";
 
-export default function Profile({ navigation }: RootTabScreenProps<"Profile">) {
+export default function Profile({
+  navigation,
+}: RootStackScreenProps<"Profile">) {
   const colorScheme = useColorScheme();
+  const dispatch: any = useDispatch();
+
+  const { store } = useSelector((state: any) => state.storeReducer);
+  const { user } = useSelector((state: any) => state.userReducer);
 
   function handleLogout() {
-    return true;
+    dispatch(removeUser());
+    dispatch(setStore(null));
   }
 
   return (
     <Screen>
-      <Header title="Profile" onBack={() => navigation.navigate("Store")} />
+      <Header title="Profile" onBack={() => navigation.navigate("Root")} />
       <View
         style={{
           width: "100%",
@@ -51,8 +60,10 @@ export default function Profile({ navigation }: RootTabScreenProps<"Profile">) {
           }}
         >
           <View style={{ flexDirection: "column", alignItems: "flex-start" }}>
-            <BoldText text50>Store Superstore</BoldText>
-            <Text text70>+91 88987 39333</Text>
+            <BoldText text50>{store.name || "Store Name"}</BoldText>
+            <Text text70>
+              {user.contact.ISD} {user.contact.number}
+            </Text>
           </View>
           <Text text70>
             Account Status: <BoldText green30>Active</BoldText>
@@ -92,7 +103,7 @@ export default function Profile({ navigation }: RootTabScreenProps<"Profile">) {
               name="bulb1"
               fullWidth
               transparent
-              onPress={handleLogout}
+              onPress={() => {}}
             />
             <Button
               label="Logout"
@@ -100,7 +111,7 @@ export default function Profile({ navigation }: RootTabScreenProps<"Profile">) {
               name="logout"
               fullWidth
               transparent
-              onPress={handleLogout}
+              onPress={() => handleLogout()}
             />
           </View>
         }

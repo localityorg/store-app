@@ -7,6 +7,7 @@ export const LOGIN_USER = gql`
       name
       token
       contact {
+        ISD
         number
       }
     }

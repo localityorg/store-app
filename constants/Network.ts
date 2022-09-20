@@ -1,7 +1,6 @@
 // static url
-export const IMG_URL = "";
-export const ICON_URL = "";
-export const STATIC_URL = "";
+export const IMG_URL = "http:///static/";
+export const ICON_URL = "http:///logo/";
 
 // server url
 export const BASE_URL = "";

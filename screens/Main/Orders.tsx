@@ -1,17 +1,29 @@
+import { useQuery } from "@apollo/client";
 import React from "react";
 import { Dimensions, FlatList, ScrollView, StyleSheet } from "react-native";
 import { Badge, Button } from "react-native-ui-lib";
+import { useDispatch, useSelector } from "react-redux";
+import { GET_ORDERS } from "../../apollo/graphql/Store/orders";
 import Screen from "../../components/Common/Screen";
 import OrderCard from "../../components/Store/OrderCard";
 import TabHeader from "../../components/Store/TabHeader";
 import { View } from "../../components/Themed";
+import { setOrders } from "../../redux/Store/actions";
 
 import { RootTabScreenProps } from "../../types";
 
 export default function Orders({ navigation }: RootTabScreenProps<"Orders">) {
-  function handleReload() {
-    return true;
-  }
+  const dispatch: any = useDispatch();
+
+  const { orders } = useSelector((state: any) => state.ordersReducer);
+
+  const { loading: fetchingOrders, refetch } = useQuery(GET_ORDERS, {
+    onCompleted(data) {
+      if (data.getOrders) {
+        dispatch(setOrders(data.getOrders));
+      }
+    },
+  });
 
   return (
     <Screen>
@@ -19,7 +31,7 @@ export default function Orders({ navigation }: RootTabScreenProps<"Orders">) {
         icon="reload1"
         name="Orders"
         logo={false}
-        iconPress={handleReload}
+        iconPress={() => refetch()}
         namePress={() => {}}
       />
       <View style={{ width: "100%", marginBottom: 15 }}>
@@ -46,12 +58,16 @@ export default function Orders({ navigation }: RootTabScreenProps<"Orders">) {
       </View>
       <View flex>
         <FlatList
-          data={[1, 2, 3, 4, 5]}
-          keyExtractor={(item: number) => item.toString()}
-          renderItem={() => (
+          data={orders}
+          keyExtractor={(item: any) => item.id.toString()}
+          renderItem={({ item }) => (
             <OrderCard
-              onPress={() => navigation.navigate("OrderDetails")}
-              id="344535loc"
+              onPress={() =>
+                navigation.navigate("OrderDetails", {
+                  id: item.id,
+                })
+              }
+              id={item.id}
               products={[
                 {
                   name: "Lays Chips",

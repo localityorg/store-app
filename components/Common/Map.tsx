@@ -6,7 +6,7 @@ import { View } from "../Themed";
 import { BoldText } from "./Text";
 import { lightMapStyle } from "../../constants/MapStyle";
 import { useDispatch, useSelector } from "react-redux";
-import { setUserLocation } from "../../redux/Common/actions";
+import { setLocation } from "../../redux/Common/actions";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { Colors } from "react-native-ui-lib";
 import { TouchableOpacity } from "react-native";
@@ -40,7 +40,7 @@ export function Map(props: MapProps) {
       if (status === "granted") {
         let location = await Location.getCurrentPositionAsync({});
         dispatch(
-          setUserLocation([
+          setLocation([
             location.coords.latitude.toString(),
             location.coords.longitude.toString(),
           ])
@@ -114,7 +114,7 @@ export function Map(props: MapProps) {
         style={{ flex: 1, zIndex: 999 }}
         onRegionChangeComplete={(e) => {
           dispatch(
-            setUserLocation([e.latitude.toString(), e.longitude.toString()])
+            setLocation([e.latitude.toString(), e.longitude.toString()])
           );
         }}
       >
