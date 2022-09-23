@@ -1,9 +1,9 @@
 import { useQuery } from "@apollo/client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Dimensions, FlatList, ScrollView, StyleSheet } from "react-native";
 import { Badge, Button } from "react-native-ui-lib";
 import { useDispatch, useSelector } from "react-redux";
-import { GET_ORDERS } from "../../apollo/graphql/Store/orders";
+import { GET_NEW_ORDER, GET_ORDERS } from "../../apollo/graphql/Store/orders";
 import Screen from "../../components/Common/Screen";
 import OrderCard from "../../components/Store/OrderCard";
 import TabHeader from "../../components/Store/TabHeader";
@@ -15,15 +15,58 @@ import { RootTabScreenProps } from "../../types";
 export default function Orders({ navigation }: RootTabScreenProps<"Orders">) {
   const dispatch: any = useDispatch();
 
-  const { orders } = useSelector((state: any) => state.ordersReducer);
+  const [render, setRender] = useState(false);
 
-  const { loading: fetchingOrders, refetch } = useQuery(GET_ORDERS, {
+  const { orders } = useSelector((state: any) => state.ordersReducer);
+  const { user } = useSelector((state: any) => state.userReducer);
+
+  const {
+    loading: fetchingOrders,
+    refetch,
+    subscribeToMore,
+    networkStatus,
+  } = useQuery(GET_ORDERS, {
+    fetchPolicy: "no-cache",
     onCompleted(data) {
       if (data.getOrders) {
         dispatch(setOrders(data.getOrders));
       }
     },
+    onError(error) {
+      console.log({ ...error });
+    },
   });
+
+  useEffect(() => {
+    subscribeToMore({
+      document: GET_NEW_ORDER,
+      variables: { id: user?.id },
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData.data) return prev;
+        const updatedQueryData = subscriptionData.data.orderUpdate;
+
+        const index = prev.getOrders.findIndex(
+          (e: any) => e.id === updatedQueryData.id
+        );
+
+        if (index <= -1) {
+          dispatch(setOrders([updatedQueryData, ...prev.getOrders]));
+          setRender(!render);
+          return Object.assign({}, prev, {
+            getOrders: [updatedQueryData, ...prev.getOrders],
+          });
+        } else {
+          var updatedOrders = [...prev.getOrders];
+          updatedOrders.splice(index, 1);
+          dispatch(setOrders([updatedQueryData, ...updatedOrders]));
+          setRender(!render);
+          return Object.assign({}, prev, {
+            getOrders: [updatedQueryData, ...updatedOrders],
+          });
+        }
+      },
+    });
+  }, []);
 
   return (
     <Screen>
@@ -56,58 +99,47 @@ export default function Orders({ navigation }: RootTabScreenProps<"Orders">) {
           />
         </ScrollView>
       </View>
-      <View flex>
-        <FlatList
-          data={orders}
-          keyExtractor={(item: any) => item.id.toString()}
-          renderItem={({ item }) => (
-            <OrderCard
-              onPress={() =>
-                navigation.navigate("OrderDetails", {
-                  id: item.id,
-                })
-              }
-              id={item.id}
-              products={[
-                {
-                  name: "Lays Chips",
-                  meta: {
-                    quantity: "250",
-                    type: "g",
-                  },
-                  price: {
-                    mrp: "100",
-                    discount: "90",
-                    curr: "INR",
-                  },
-                  count: 2,
-                  totalPrice: "200",
-                },
-              ]}
-              delivery={{
-                placed: new Date().toISOString(),
-                expected: "",
-              }}
-              state={{
-                accepted: true,
-              }}
-              address={{
-                line: "A10, 604, Rutu Enclave Street 400625",
-                coordinates: {
-                  latitude: "12.245435",
-                  longitude: "12.245435",
-                },
-              }}
-              payment={{
-                grandTotal: "1134",
-                paid: false,
-              }}
-              loading={false}
-              screen={false}
-            />
-          )}
-        />
-      </View>
+      {orders && (
+        <View flex>
+          <FlatList
+            data={orders}
+            onRefresh={() => refetch()}
+            refreshing={fetchingOrders}
+            keyExtractor={(item: any) => item.id.toString()}
+            renderItem={({ item }) => (
+              <OrderCard
+                onPress={() =>
+                  navigation.navigate("OrderDetails", {
+                    id: item.id,
+                  })
+                }
+                id={"loc" + item.id.slice(15, -1)}
+                products={item.products}
+                delivery={{
+                  placed: item.state.created.date,
+                  expected: item.state.delivery.deliverBy,
+                }}
+                state={{
+                  accepted: item.state.order.accepted,
+                }}
+                address={{
+                  line: item.state.delivery.address.line,
+                  coordinates: [
+                    "item.state.delivery.address.location.coordinates",
+                    "",
+                  ],
+                }}
+                payment={{
+                  grandTotal: item.state.payment.grandAmount,
+                  paid: item.state.payment.paid,
+                }}
+                loading={false}
+                screen={false}
+              />
+            )}
+          />
+        </View>
+      )}
     </Screen>
   );
 }

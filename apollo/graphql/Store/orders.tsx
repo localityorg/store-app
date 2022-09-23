@@ -48,10 +48,71 @@ export const GET_ORDER = gql`
 `;
 
 export const GET_ORDERS = gql`
-  ${ORDER_FRAGMENT}
-  query GetOrders {
+  query FetchOrders {
     getOrders {
-      ...OrderDetail
+      id
+      products {
+        name
+        quantity
+        totalAmount
+      }
+      state {
+        order {
+          accepted
+        }
+        delivery {
+          address {
+            line
+            location {
+              coordinates
+            }
+          }
+          deliverBy
+        }
+        cancelled
+        payment {
+          paid
+          grandAmount
+        }
+        created {
+          date
+        }
+      }
+    }
+  }
+`;
+
+export const GET_NEW_ORDER = gql`
+  subscription Subscription($id: String!) {
+    orderUpdate(id: $id) {
+      id
+      products {
+        name
+        quantity
+        totalAmount
+      }
+      state {
+        order {
+          accepted
+        }
+        delivery {
+          address {
+            line
+            location {
+              coordinates
+            }
+          }
+          deliverBy
+        }
+        cancelled
+        payment {
+          paid
+          grandAmount
+        }
+        created {
+          date
+        }
+      }
     }
   }
 `;

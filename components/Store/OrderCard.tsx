@@ -11,18 +11,14 @@ import { View } from "../Themed";
 import Tracker from "./Tracker";
 
 interface ProductProps {
+  id: string;
   name: string;
-  meta: {
-    quantity: string;
-    type: string;
-  };
-  count: number;
   price: {
     mrp: string;
     discount?: string;
-    curr?: string;
   };
-  totalPrice: string;
+  quantity: string;
+  totalAmount: string;
 }
 
 interface CardProps {
@@ -48,10 +44,7 @@ interface CardProps {
 
 interface AddressProps {
   line: string;
-  coordinates: {
-    latitude: string;
-    longitude: string;
-  };
+  coordinates: [string, string];
 }
 
 interface GrandTotalDeliveryProps {
@@ -72,7 +65,7 @@ const ProductList = (props: ProductListProps): JSX.Element => {
       ItemSeparatorComponent={() => (
         <View style={{ height: props.card ? 5 : 10 }} />
       )}
-      keyExtractor={(item) => item.name}
+      keyExtractor={(item) => item.id}
       style={{ width: "100%" }}
       renderItem={({ item }) => (
         <View
@@ -96,7 +89,9 @@ const ProductList = (props: ProductListProps): JSX.Element => {
             <Text
               style={{
                 fontSize: props.card ? Sizes.font.text : 16,
+                width: "70%",
               }}
+              numberOfLines={1}
             >
               {item.name}
             </Text>
@@ -114,14 +109,14 @@ const ProductList = (props: ProductListProps): JSX.Element => {
                 fontSize: props.card ? Sizes.font.text : 16,
               }}
             >
-              x{item.count.toString()}
+              x{item.quantity}
             </Text>
             <Text
               style={{
                 fontSize: props.card ? Sizes.font.text : 16,
               }}
             >
-              Rs. {item.totalPrice}/-
+              Rs. {item.totalAmount}/-
             </Text>
           </View>
         </View>
@@ -152,7 +147,7 @@ const GrandTotalDeliveryCard = (
       >
         <View style={{ flexDirection: "column", alignItems: "flex-start" }}>
           <BoldText>Address</BoldText>
-          <Text numberOfLines={1} style={{ width: "80%" }}>
+          <Text numberOfLines={1} text70 style={{ width: "80%" }}>
             {props.address.line}
           </Text>
         </View>
@@ -174,7 +169,7 @@ const GrandTotalDeliveryCard = (
         }}
       >
         <BoldText>Grand Total</BoldText>
-        <Text>Rs. {props.grandTotal}/-</Text>
+        <Text text70>Rs. {props.grandTotal}/-</Text>
       </View>
     </View>
   );

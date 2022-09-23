@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FlatList, RefreshControl } from "react-native";
 
 import { Section } from "../../components/Common/Section";
@@ -11,12 +11,11 @@ import { Colors } from "react-native-ui-lib";
 
 import { RootTabScreenProps } from "../../types";
 import { useQuery } from "@apollo/client";
-import { GET_STORE } from "../../apollo/graphql/Store/store";
+import { GET_STORE, STORE_UPDATE } from "../../apollo/graphql/Store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { setOrders, setStore } from "../../redux/Store/actions";
+import { setStore } from "../../redux/Store/actions";
 import { Text } from "../../components/Common/Text";
 import { View } from "../../components/Themed";
-import { GET_ORDERS } from "../../apollo/graphql/Store/orders";
 
 export default function Store({ navigation }: RootTabScreenProps<"Store">) {
   const [refreshing, setRefreshing] = React.useState(false);
@@ -26,9 +25,13 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
 
   const dispatch: any = useDispatch();
 
-  const { loading: fetchingStore, refetch } = useQuery(GET_STORE, {
+  const {
+    loading: fetchingStore,
+    refetch,
+    subscribeToMore,
+    networkStatus,
+  } = useQuery(GET_STORE, {
     onCompleted(data) {
-      console.log(data);
       if (data.getStore) {
         dispatch(setStore(data.getStore));
       }
@@ -38,7 +41,23 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
     },
   });
 
-  if (fetchingStore) {
+  useEffect(() => {
+    const unsubscribe = subscribeToMore({
+      document: STORE_UPDATE,
+      variables: { id: store?.id },
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData.data) return prev;
+        const updatedQueryData = subscriptionData.data.storeUpdate;
+        dispatch(setStore(updatedQueryData));
+        return Object.assign({}, prev, {
+          getStore: updatedQueryData,
+        });
+      },
+    });
+    return unsubscribe;
+  }, [store]);
+
+  if (fetchingStore || networkStatus === 4) {
     return (
       <Screen>
         <View flex center>
@@ -130,59 +149,37 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
               body={
                 <FlatList
                   data={orders}
+                  ListFooterComponentStyle={{ marginBottom: 200 }}
                   keyExtractor={(item: any) => item.id.toString()}
-                  renderItem={() => (
+                  renderItem={({ item }) => (
                     <OrderCard
-                      id="344535loc"
-                      products={[
-                        {
-                          name: "Lays Chips",
-                          meta: {
-                            quantity: "250",
-                            type: "g",
-                          },
-                          price: {
-                            mrp: "100",
-                            discount: "90",
-                            curr: "INR",
-                          },
-                          count: 2,
-                          totalPrice: "200",
-                        },
-                        {
-                          name: "Lays Chips 2",
-                          meta: {
-                            quantity: "250",
-                            type: "g",
-                          },
-                          price: {
-                            mrp: "100",
-                            discount: "90",
-                            curr: "INR",
-                          },
-                          count: 2,
-                          totalPrice: "200",
-                        },
-                      ]}
+                      onPress={() =>
+                        navigation.navigate("OrderDetails", {
+                          id: item.id,
+                        })
+                      }
+                      id={"loc" + item.id.slice(15, -1)}
+                      products={item.products}
                       delivery={{
-                        placed: new Date().toISOString(),
-                        expected: "",
+                        placed: item.state.created.date,
+                        expected: item.state.delivery.deliverBy,
                       }}
                       state={{
-                        accepted: false,
+                        accepted: item.state.order.accepted,
                       }}
                       address={{
-                        line: "A10, 604, Rutu Enclave Street 400625",
-                        coordinates: {
-                          latitude: "12.245435",
-                          longitude: "12.245435",
-                        },
+                        line: item.state.delivery.address.line,
+                        coordinates: [
+                          "item.state.delivery.address.location.coordinates",
+                          "",
+                        ],
                       }}
                       payment={{
-                        grandTotal: "1134",
-                        paid: false,
+                        grandTotal: item.state.payment.grandAmount,
+                        paid: item.state.payment.paid,
                       }}
                       loading={false}
+                      screen={false}
                     />
                   )}
                 />

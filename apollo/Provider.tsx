@@ -5,7 +5,8 @@ import {
   createHttpLink,
   split,
 } from "@apollo/client";
-import { WebSocketLink } from "@apollo/client/link/ws";
+import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
+import { createClient } from "graphql-ws";
 import { setContext } from "@apollo/client/link/context";
 import { getMainDefinition } from "@apollo/client/utilities";
 
@@ -13,15 +14,17 @@ import { getMainDefinition } from "@apollo/client/utilities";
 import * as SecureStore from "expo-secure-store";
 import { BASE_URL } from "../constants/Network";
 
-const URI = `http://${BASE_URL}`;
+const URI = `http://${BASE_URL}/graphql`;
 
 // websocket link
-const wsLink = new WebSocketLink({
-  uri: `ws://${BASE_URL}/subscriptions`,
-  options: {
-    reconnect: true,
-  },
-});
+const wsLink = new GraphQLWsLink(
+  createClient({
+    url: `ws://${BASE_URL}/subscriptions`,
+    shouldRetry() {
+      return true;
+    },
+  })
+);
 
 // http link
 const httpLink = createHttpLink({
