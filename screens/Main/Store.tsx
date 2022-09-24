@@ -22,6 +22,7 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
 
   const { store } = useSelector((state: any) => state.storeReducer);
   const { orders } = useSelector((state: any) => state.ordersReducer);
+  const { user } = useSelector((state: any) => state.userReducer);
 
   const dispatch: any = useDispatch();
 
@@ -44,7 +45,7 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
   useEffect(() => {
     const unsubscribe = subscribeToMore({
       document: STORE_UPDATE,
-      variables: { id: store?.id },
+      variables: { id: user?.id },
       updateQuery: (prev, { subscriptionData }) => {
         if (!subscriptionData.data) return prev;
         const updatedQueryData = subscriptionData.data.storeUpdate;
@@ -55,7 +56,7 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
       },
     });
     return unsubscribe;
-  }, [store]);
+  }, []);
 
   if (fetchingStore || networkStatus === 4) {
     return (

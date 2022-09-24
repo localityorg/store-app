@@ -43,7 +43,10 @@ export default function Orders({ navigation }: RootTabScreenProps<"Orders">) {
       variables: { id: user?.id },
       updateQuery: (prev, { subscriptionData }) => {
         if (!subscriptionData.data) return prev;
+
         const updatedQueryData = subscriptionData.data.orderUpdate;
+
+        console.log(updatedQueryData);
 
         const index = prev.getOrders.findIndex(
           (e: any) => e.id === updatedQueryData.id
@@ -113,7 +116,7 @@ export default function Orders({ navigation }: RootTabScreenProps<"Orders">) {
                     id: item.id,
                   })
                 }
-                id={"loc" + item.id.slice(15, -1)}
+                id={item.id}
                 products={item.products}
                 delivery={{
                   placed: item.state.created.date,

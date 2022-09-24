@@ -1,8 +1,12 @@
+import { useMutation } from "@apollo/client";
 import { formatDistanceToNow, parseISO } from "date-fns";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
 import { Button, Colors } from "react-native-ui-lib";
+import { useDispatch } from "react-redux";
+import { ACCEPT_ORDER } from "../../apollo/graphql/Store/orders";
 import Sizes from "../../constants/Sizes";
+import { acceptOrder, cancelOrder } from "../../redux/Store/actions";
 import { AccountTile } from "../../screens/Main/Accounts";
 import FbImage from "../Common/FbImage";
 import { Section } from "../Common/Section";
@@ -13,6 +17,7 @@ import Tracker from "./Tracker";
 interface ProductProps {
   id: string;
   name: string;
+  url: string;
   price: {
     mrp: string;
     discount?: string;
@@ -65,7 +70,7 @@ const ProductList = (props: ProductListProps): JSX.Element => {
       ItemSeparatorComponent={() => (
         <View style={{ height: props.card ? 5 : 10 }} />
       )}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => item.url}
       style={{ width: "100%" }}
       renderItem={({ item }) => (
         <View
@@ -147,7 +152,7 @@ const GrandTotalDeliveryCard = (
       >
         <View style={{ flexDirection: "column", alignItems: "flex-start" }}>
           <BoldText>Address</BoldText>
-          <Text numberOfLines={1} text70 style={{ width: "80%" }}>
+          <Text numberOfLines={1} text70 style={{ width: "100%" }}>
             {props.address.line}
           </Text>
         </View>
@@ -176,13 +181,35 @@ const GrandTotalDeliveryCard = (
 };
 
 const OrderCard = (props: CardProps): JSX.Element => {
-  function handleAccept() {
-    return true;
-  }
+  const dispatch: any = useDispatch();
+  const [accept, setAccept] = useState<boolean>();
 
-  function handleReject() {
-    return true;
-  }
+  const [acceptMutation, { loading: fetchingDecision }] = useMutation(
+    ACCEPT_ORDER,
+    {
+      variables: {
+        id: props.id,
+        accepted: accept,
+      },
+      onCompleted(data) {
+        console.log(data);
+        if (data.acceptOrder) {
+          if (accept) {
+            dispatch(acceptOrder({ ...props }));
+          } else {
+            dispatch(cancelOrder({ ...props }));
+          }
+        }
+      },
+      onError(error) {
+        console.log({ ...error });
+        console.log({
+          id: props.id,
+          accepted: accept,
+        });
+      },
+    }
+  );
 
   if (props.screen) {
     return (
@@ -319,7 +346,7 @@ const OrderCard = (props: CardProps): JSX.Element => {
     );
   }
 
-  if (props.loading) {
+  if (fetchingDecision) {
     return (
       <View
         style={{
@@ -371,7 +398,7 @@ const OrderCard = (props: CardProps): JSX.Element => {
           borderBottomColor: Colors.$textDisabled,
         }}
       >
-        <Text>Id: {props.id}</Text>
+        <Text>Id: {"loc" + props.id.slice(15, -1)}</Text>
         <BoldText>
           {formatDistanceToNow(parseISO(props.delivery.placed))} to go
         </BoldText>
@@ -403,7 +430,14 @@ const OrderCard = (props: CardProps): JSX.Element => {
           }}
         >
           <TouchableOpacity
-            onPress={handleReject}
+            onPress={() =>
+              acceptMutation({
+                variables: {
+                  id: props.id,
+                  accepted: false,
+                },
+              })
+            }
             style={{
               flex: 1,
               height: "100%",
@@ -417,7 +451,14 @@ const OrderCard = (props: CardProps): JSX.Element => {
           </TouchableOpacity>
           <View style={{ width: 5 }} />
           <TouchableOpacity
-            onPress={handleAccept}
+            onPress={() =>
+              acceptMutation({
+                variables: {
+                  id: props.id,
+                  accepted: true,
+                },
+              })
+            }
             style={{
               flex: 1,
               height: "100%",

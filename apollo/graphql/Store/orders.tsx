@@ -53,6 +53,7 @@ export const GET_ORDERS = gql`
       id
       products {
         name
+        url
         quantity
         totalAmount
       }
@@ -88,6 +89,7 @@ export const GET_NEW_ORDER = gql`
       id
       products {
         name
+        url
         quantity
         totalAmount
       }
@@ -127,8 +129,8 @@ export const CREATE_ORDER = gql`
 `;
 
 export const ACCEPT_ORDER = gql`
-  mutation acceptOrder($id: String!, $accepted: Boolean!, $products: [String]) {
-    acceptOrder(id: $id, accepted: $accepted, products: $products)
+  mutation acceptOrder($id: String!, $accepted: Boolean!) {
+    acceptOrder(id: $id, accepted: $accepted)
   }
 `;
 
