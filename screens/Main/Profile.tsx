@@ -1,5 +1,6 @@
 import { AntDesign } from "@expo/vector-icons";
 import React from "react";
+import { ActivityIndicator } from "react-native";
 import { Colors } from "react-native-ui-lib";
 import { useDispatch, useSelector } from "react-redux";
 import Button from "../../components/Common/Button";
@@ -26,6 +27,20 @@ export default function Profile({
   function handleLogout() {
     dispatch(removeUser());
     dispatch(setStore(null));
+  }
+
+  if (store || user === null) {
+    setTimeout(() => {
+      navigation.navigate("Root");
+    }, 2000);
+    return (
+      <View flex center>
+        <ActivityIndicator color={Colors.$iconPrimary} size="large" />
+        <BoldText text70 marginT-10>
+          Redirecting you...
+        </BoldText>
+      </View>
+    );
   }
 
   return (

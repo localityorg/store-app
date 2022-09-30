@@ -16,6 +16,7 @@ import { setUser } from "../../redux/Common/actions";
 import ContactInput from "../../components/Auth/ContactInput";
 
 import { AuthStackScreenProps } from "../../types";
+import { setStore } from "../../redux/Store/actions";
 
 export default function Login({ navigation }: AuthStackScreenProps<"Login">) {
   const [contact, setContact] = useState({
@@ -41,6 +42,7 @@ export default function Login({ navigation }: AuthStackScreenProps<"Login">) {
     fetchPolicy: "no-cache",
     onCompleted(data) {
       if (data.login) {
+        dispatch(setStore(null));
         dispatch(setUser(data.login));
       } else {
         Alert.alert("Error occured.", "Some error occured. Please try again.");

@@ -159,7 +159,7 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
                           id: item.id,
                         })
                       }
-                      id={"loc" + item.id.slice(15, -1)}
+                      id={item.id}
                       products={item.products}
                       delivery={{
                         placed: item.state.created.date,
