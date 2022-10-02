@@ -70,7 +70,7 @@ const ProductList = (props: ProductListProps): JSX.Element => {
       ItemSeparatorComponent={() => (
         <View style={{ height: props.card ? 5 : 10 }} />
       )}
-      keyExtractor={(item) => item.url}
+      keyExtractor={(item) => `${item.name}${item.totalAmount}`}
       style={{ width: "100%" }}
       renderItem={({ item }) => (
         <View

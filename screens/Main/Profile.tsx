@@ -29,7 +29,7 @@ export default function Profile({
     dispatch(setStore(null));
   }
 
-  if (store || user === null) {
+  if ((store || user) === null) {
     setTimeout(() => {
       navigation.navigate("Root");
     }, 2000);
@@ -89,14 +89,6 @@ export default function Profile({
         title="Store Settings"
         body={
           <View style={{ flexDirection: "column" }}>
-            <Button
-              label="Accounts"
-              icon
-              name="user"
-              fullWidth
-              onPress={() => navigation.navigate("Accounts")}
-            />
-            <View style={{ height: 5 }} />
             <Button
               label="Store Details"
               icon

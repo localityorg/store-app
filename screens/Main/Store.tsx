@@ -14,7 +14,7 @@ import { useQuery } from "@apollo/client";
 import { GET_STORE, STORE_UPDATE } from "../../apollo/graphql/Store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { setStore } from "../../redux/Store/actions";
-import { Text } from "../../components/Common/Text";
+import { BoldText, Text } from "../../components/Common/Text";
 import { View } from "../../components/Themed";
 
 export default function Store({ navigation }: RootTabScreenProps<"Store">) {
@@ -62,7 +62,7 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
     return (
       <Screen>
         <View flex center>
-          <Text>Fetching store details...</Text>
+          <BoldText text70>Fetching store details...</BoldText>
         </View>
       </Screen>
     );
@@ -150,6 +150,7 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
               body={
                 <FlatList
                   data={orders}
+                  extraData={orders}
                   ListFooterComponentStyle={{ marginBottom: 200 }}
                   keyExtractor={(item: any) => item.id.toString()}
                   renderItem={({ item }) => (

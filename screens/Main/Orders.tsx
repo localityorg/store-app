@@ -24,9 +24,7 @@ export default function Orders({ navigation }: RootTabScreenProps<"Orders">) {
     loading: fetchingOrders,
     refetch,
     subscribeToMore,
-    networkStatus,
   } = useQuery(GET_ORDERS, {
-    fetchPolicy: "no-cache",
     onCompleted(data) {
       if (data.getOrders) {
         dispatch(setOrders(data.getOrders));
@@ -38,15 +36,13 @@ export default function Orders({ navigation }: RootTabScreenProps<"Orders">) {
   });
 
   useEffect(() => {
-    subscribeToMore({
+    const unsubscribe = subscribeToMore({
       document: GET_NEW_ORDER,
       variables: { id: user?.id },
       updateQuery: (prev, { subscriptionData }) => {
         if (!subscriptionData.data) return prev;
 
         const updatedQueryData = subscriptionData.data.orderUpdate;
-
-        console.log(updatedQueryData);
 
         const index = prev.getOrders.findIndex(
           (e: any) => e.id === updatedQueryData.id
@@ -69,6 +65,7 @@ export default function Orders({ navigation }: RootTabScreenProps<"Orders">) {
         }
       },
     });
+    return unsubscribe;
   }, []);
 
   return (
@@ -106,6 +103,7 @@ export default function Orders({ navigation }: RootTabScreenProps<"Orders">) {
         <View flex>
           <FlatList
             data={orders}
+            extraData={render}
             onRefresh={() => refetch()}
             refreshing={fetchingOrders}
             keyExtractor={(item: any) => item.id.toString()}
