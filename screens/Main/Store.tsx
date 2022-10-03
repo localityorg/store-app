@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { FlatList, RefreshControl } from "react-native";
 
 import { Section } from "../../components/Common/Section";
@@ -18,7 +18,7 @@ import { BoldText, Text } from "../../components/Common/Text";
 import { View } from "../../components/Themed";
 
 export default function Store({ navigation }: RootTabScreenProps<"Store">) {
-  const [refreshing, setRefreshing] = React.useState(false);
+  const [pending, setPending] = useState([]);
 
   const { store } = useSelector((state: any) => state.storeReducer);
   const { orders } = useSelector((state: any) => state.ordersReducer);
@@ -83,7 +83,7 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
       />
       <FlatList
         data={[1]}
-        refreshing={refreshing}
+        refreshing={networkStatus === 4 || fetchingStore}
         refreshControl={
           <RefreshControl
             refreshing={fetchingStore}

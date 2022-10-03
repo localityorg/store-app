@@ -1,4 +1,4 @@
-import { ACCEPT_ORDER, SET_ORDERS, CANCEL_ORDER } from "../actions";
+import { ACCEPT_ORDER, SET_ORDERS } from "../actions";
 
 var orderState = {
   orders: [],
@@ -27,8 +27,6 @@ export function ordersReducer(state: any = orderState, action: any) {
       return { ...state, orders: stackPendingOrders(action.payload) };
     case ACCEPT_ORDER:
       return { ...state, lastOrder: action.payload };
-    case CANCEL_ORDER:
-      return { ...state, lastOrder: null };
     default:
       return state;
   }

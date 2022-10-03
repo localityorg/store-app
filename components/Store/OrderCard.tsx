@@ -1,12 +1,12 @@
 import { useMutation } from "@apollo/client";
 import { formatDistanceToNow, parseISO } from "date-fns";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
-import { Button, Colors } from "react-native-ui-lib";
+import { Colors } from "react-native-ui-lib";
 import { useDispatch } from "react-redux";
 import { ACCEPT_ORDER } from "../../apollo/graphql/Store/orders";
 import Sizes from "../../constants/Sizes";
-import { acceptOrder, cancelOrder } from "../../redux/Store/actions";
+import { acceptOrder } from "../../redux/Store/actions";
 import { AccountTile } from "../../screens/Main/Accounts";
 import FbImage from "../Common/FbImage";
 import { Section } from "../Common/Section";
@@ -193,11 +193,9 @@ const OrderCard = (props: CardProps): JSX.Element => {
       },
       onCompleted(data) {
         console.log(data);
-        if (data.acceptOrder) {
+        if (data.alterOrderState) {
           if (accept) {
             dispatch(acceptOrder({ ...props }));
-          } else {
-            dispatch(cancelOrder({ ...props }));
           }
         }
       },

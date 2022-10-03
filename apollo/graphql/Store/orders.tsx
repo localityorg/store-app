@@ -1,55 +1,8 @@
 import { gql } from "@apollo/client";
 
-const ORDER_FRAGMENT = gql`
-  fragment OrderDetail on Order {
-    id
-    products {
-      name
-      url
-      price {
-        mrp
-      }
-      quantity
-      totalAmount
-    }
-    state {
-      order {
-        accepted
-        date
-      }
-      created {
-        date
-      }
-      delivery {
-        toDeliver
-        address {
-          line
-        }
-        deliverBy
-        delivered
-        deliveredAt
-      }
-      payment {
-        paid
-        grandAmount
-        paidAt
-      }
-      cancelled
-    }
-  }
-`;
-
 export const GET_ORDER = gql`
   query getOrder($id: String) {
     getOrder(id: $id) {
-      ...OrderDetail
-    }
-  }
-`;
-
-export const GET_ORDERS = gql`
-  query FetchOrders {
-    getOrders {
       id
       products {
         name
@@ -62,6 +15,44 @@ export const GET_ORDERS = gql`
           accepted
         }
         delivery {
+          delivered
+          address {
+            line
+            location {
+              coordinates
+            }
+          }
+          deliverBy
+        }
+        cancelled
+        payment {
+          paid
+          grandAmount
+        }
+        created {
+          date
+        }
+      }
+    }
+  }
+`;
+
+export const GET_ORDERS = gql`
+  query FetchOrders($limit: Int!, $offset: Int!) {
+    getOrders(limit: $limit, offset: $offset) {
+      id
+      products {
+        name
+        url
+        quantity
+        totalAmount
+      }
+      state {
+        order {
+          accepted
+        }
+        delivery {
+          delivered
           address {
             line
             location {
@@ -98,6 +89,7 @@ export const GET_NEW_ORDER = gql`
           accepted
         }
         delivery {
+          delivered
           address {
             line
             location {
@@ -120,17 +112,45 @@ export const GET_NEW_ORDER = gql`
 `;
 
 export const CREATE_ORDER = gql`
-  ${ORDER_FRAGMENT}
   mutation createOrder($orderInfo: OrderInfo) {
     createOrder(orderInfo: $orderInfo) {
-      ...OrderDetail
+      id
+      products {
+        name
+        url
+        quantity
+        totalAmount
+      }
+      state {
+        order {
+          accepted
+        }
+        delivery {
+          delivered
+          address {
+            line
+            location {
+              coordinates
+            }
+          }
+          deliverBy
+        }
+        cancelled
+        payment {
+          paid
+          grandAmount
+        }
+        created {
+          date
+        }
+      }
     }
   }
 `;
 
 export const ACCEPT_ORDER = gql`
-  mutation acceptOrder($id: String!, $accepted: Boolean!) {
-    acceptOrder(id: $id, accepted: $accepted)
+  mutation alterOrderState($id: String!, $accepted: Boolean!) {
+    alterOrderState(id: $id, accepted: $accepted)
   }
 `;
 

@@ -70,7 +70,6 @@ export const setInventory = (inventory: any) => (dispatch: any) => {
 
 // all user orders
 export const SET_ORDERS = "SET_ORDERS";
-export const CANCEL_ORDER = "CANCEL_ORDER";
 export const ACCEPT_ORDER = "ACCEPT_ORDER";
 
 export const setOrders = (orders: any) => (dispatch: any) => {
@@ -82,12 +81,6 @@ export const setOrders = (orders: any) => (dispatch: any) => {
 export const acceptOrder = (order: any) => (dispatch: any) => {
   dispatch({
     type: ACCEPT_ORDER,
-    payload: order,
-  });
-};
-export const cancelOrder = (order: any) => (dispatch: any) => {
-  dispatch({
-    type: CANCEL_ORDER,
     payload: order,
   });
 };

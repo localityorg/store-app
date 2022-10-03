@@ -1,28 +1,103 @@
-import React from "react";
-import { FlatList, TouchableOpacity } from "react-native";
+import { useMutation, useQuery } from "@apollo/client";
+import * as Location from "expo-location";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
 import { Colors } from "react-native-ui-lib";
+import { useDispatch, useSelector } from "react-redux";
+import { DELIVERED_ORDER, GET_ORDER } from "../../apollo/graphql/Store/orders";
 
 import { Header } from "../../components/Common/Header";
 import Screen from "../../components/Common/Screen";
 import { BoldText } from "../../components/Common/Text";
 import OrderCard from "../../components/Store/OrderCard";
 import { View } from "../../components/Themed";
+import { setLocation } from "../../redux/Common/actions";
 
-import { RootTabScreenProps } from "../../types";
+import { RootStackScreenProps } from "../../types";
 
 export default function OrderDetails({
+  route,
   navigation,
-}: RootTabScreenProps<"OrderDetails">) {
-  function handleReload() {
-    return true;
+}: RootStackScreenProps<"OrderDetails">) {
+  const { id } = route.params;
+  const dispatch: any = useDispatch();
+
+  const { location } = useSelector((state: any) => state.locationReducer);
+
+  const [permission, setPermission] = useState<string | null>(null);
+  const [order, setOrder] = useState<any>();
+
+  const { loading } = useQuery(GET_ORDER, {
+    variables: {
+      id: id,
+    },
+    onCompleted(data) {
+      setOrder(data.getOrder);
+    },
+    onError(error) {
+      console.log({ ...error });
+    },
+  });
+
+  const askForLocationPermission = () => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+
+      setPermission(status ? "granted" : "denied");
+
+      if (status === "granted") {
+        let location = await Location.getCurrentPositionAsync({});
+        dispatch(
+          setLocation([
+            location.coords.latitude.toString(),
+            location.coords.longitude.toString(),
+          ])
+        );
+      }
+    })();
+  };
+
+  useEffect(() => {
+    if (location === null) {
+      askForLocationPermission();
+    }
+  }, [location]);
+
+  const [delivered, { loading: settingDeliveryStatus }] = useMutation(
+    DELIVERED_ORDER,
+    {
+      variables: {
+        id: id,
+        coordinates: location,
+      },
+      onCompleted(data) {
+        if (data.deliveredOrder) {
+        }
+      },
+      onError(error) {
+        console.log({ ...error });
+      },
+    }
+  );
+
+  if (loading || order === undefined) {
+    return (
+      <View center flex>
+        <ActivityIndicator size={"large"} color={Colors.$iconPrimary} />
+        <BoldText text70>Fetching order details...</BoldText>
+      </View>
+    );
   }
 
-  function handleCancel() {
-    return true;
-  }
-
-  function handleDelivered() {
-    return true;
+  if (order?.state.cancelled) {
+    setTimeout(() => {
+      navigation.navigate("Orders");
+    }, 2000);
+    return (
+      <View center flex>
+        <BoldText text70>Order cancelled by user. Redirecting you...</BoldText>
+      </View>
+    );
   }
 
   return (
@@ -33,114 +108,78 @@ export default function OrderDetails({
         data={[1]}
         renderItem={() => (
           <OrderCard
-            onPress={() => navigation.navigate("OrderDetails")}
-            id="344535loc"
-            products={[
-              {
-                name: "Lays Chips",
-                meta: {
-                  quantity: "250",
-                  type: "g",
-                },
-                price: {
-                  mrp: "100",
-                  discount: "90",
-                  curr: "INR",
-                },
-                count: 2,
-                totalPrice: "200",
-              },
-              {
-                name: "Lays Chips2",
-                meta: {
-                  quantity: "250",
-                  type: "g",
-                },
-                price: {
-                  mrp: "100",
-                  discount: "90",
-                  curr: "INR",
-                },
-                count: 2,
-                totalPrice: "200",
-              },
-              {
-                name: "Lays Chips1",
-                meta: {
-                  quantity: "250",
-                  type: "g",
-                },
-                price: {
-                  mrp: "100",
-                  discount: "90",
-                  curr: "INR",
-                },
-                count: 2,
-                totalPrice: "200",
-              },
-            ]}
+            onPress={() => {}}
+            id={order.id}
+            products={order.products}
             delivery={{
-              placed: new Date().toISOString(),
-              expected: "",
+              placed: order.state.created.date,
+              expected: order.state.delivery.deliverBy,
             }}
             state={{
-              accepted: true,
+              accepted: order.state.order.accepted,
             }}
             address={{
-              line: "A10, 604, Rutu Enclave Street 400625",
-              coordinates: {
-                latitude: "12.245435",
-                longitude: "12.245435",
-              },
+              line: order.state.delivery.address.line,
+              coordinates: order.state.delivery.address.location.coordinates,
             }}
             payment={{
-              grandTotal: "1134",
-              paid: false,
+              grandTotal: order.state.payment.grandAmount,
+              paid: order.state.payment.paid,
             }}
-            loading={false}
+            loading={loading}
             screen={true}
           />
         )}
       />
-      <View
-        style={{
-          marginTop: 5,
-          height: 50,
-          width: "100%",
-          flexDirection: "row",
-          alignItems: "center",
-        }}
-      >
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={handleCancel}
+      {!order.state.delivery.delivered && (
+        <View
           style={{
-            flex: 1,
-            height: "100%",
+            marginTop: 5,
+            height: 50,
+            width: "100%",
             flexDirection: "row",
             alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: Colors.$iconDanger,
           }}
         >
-          <BoldText style={{ color: Colors.white }}>Cancel Order</BoldText>
-        </TouchableOpacity>
-        <View style={{ width: 10 }} />
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={handleDelivered}
-          style={{
-            flex: 1,
-            height: "100%",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: Colors.$iconPrimary,
-          }}
-        >
-          <BoldText style={{ color: Colors.white }}>Delivered</BoldText>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={handleCancel}
+            style={{
+              flex: 1,
+              height: "100%",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: Colors.$iconDanger,
+            }}
+          >
+            <BoldText style={{ color: Colors.white }}>Cancel Order</BoldText>
+          </TouchableOpacity>
+          <View style={{ width: 10 }} />
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() =>
+              delivered({
+                variables: {
+                  id: id,
+                  coordinates: location,
+                },
+              })
+            }
+            disabled={settingDeliveryStatus}
+            style={{
+              flex: 1,
+              height: "100%",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: Colors.$iconPrimary,
+            }}
+          >
+            <BoldText style={{ color: Colors.white }}>Delivered</BoldText>
+          </TouchableOpacity>
+        </View>
+      )}
     </Screen>
   );
 }
