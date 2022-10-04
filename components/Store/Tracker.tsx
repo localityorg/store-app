@@ -10,7 +10,7 @@ import * as Location from "expo-location";
 
 import { BoldText, Text } from "../Common/Text";
 
-import { setUserLocation } from "../../redux/Common/actions";
+import { setLocation } from "../../redux/Common/actions";
 import { useDispatch } from "react-redux";
 import { Colors } from "react-native-ui-lib";
 import { View } from "../Themed";
@@ -20,7 +20,7 @@ interface TrackerProps {
 }
 
 const Tracker = (props: TrackerProps): JSX.Element => {
-  const dispatch = useDispatch();
+  const dispatch: any = useDispatch();
   const [timer, setTimer] = useState({
     over: false,
     day: 0,
@@ -61,10 +61,10 @@ const Tracker = (props: TrackerProps): JSX.Element => {
       if (status === "granted") {
         let location = await Location.getCurrentPositionAsync({});
         dispatch(
-          setUserLocation({
-            latitude: location.coords.latitude.toString(),
-            longitude: location.coords.longitude.toString(),
-          })
+          setLocation([
+            location.coords.latitude.toString(),
+            location.coords.longitude.toString(),
+          ])
         );
       }
     })();

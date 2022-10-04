@@ -72,13 +72,7 @@ export default function Orders({ navigation }: RootTabScreenProps<"Orders">) {
         );
 
         if (index <= -1) {
-          dispatch(
-            setOrders(
-              [updatedQueryData, ...prev.getOrders].filter(
-                (order: any) => order.state.order.accepted === false
-              )
-            )
-          );
+          dispatch(setOrders([updatedQueryData, ...prev.getOrders]));
           setRender(!render);
           return Object.assign({}, prev, {
             getOrders: [updatedQueryData, ...prev.getOrders],
@@ -86,13 +80,7 @@ export default function Orders({ navigation }: RootTabScreenProps<"Orders">) {
         } else {
           var updatedOrders = [...prev.getOrders];
           updatedOrders.splice(index, 1);
-          dispatch(
-            setOrders(
-              [updatedQueryData, ...updatedOrders].filter(
-                (order: any) => order.state.order.accepted === false
-              )
-            )
-          );
+          dispatch(setOrders([updatedQueryData, ...updatedOrders]));
           setRender(!render);
           return Object.assign({}, prev, {
             getOrders: [updatedQueryData, ...updatedOrders],
@@ -170,11 +158,12 @@ export default function Orders({ navigation }: RootTabScreenProps<"Orders">) {
                 id={item.id}
                 products={item.products}
                 delivery={{
+                  delivered: item.state.delivery.delivered,
                   placed: item.state.created.date,
                   expected: item.state.delivery.deliverBy,
                 }}
                 state={{
-                  accepted: item.state.order.accepted,
+                  accepted: item.state.order?.accepted,
                 }}
                 address={{
                   line: item.state.delivery.address.line,

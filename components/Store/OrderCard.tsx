@@ -6,7 +6,7 @@ import { Colors } from "react-native-ui-lib";
 import { useDispatch } from "react-redux";
 import { ACCEPT_ORDER } from "../../apollo/graphql/Store/orders";
 import Sizes from "../../constants/Sizes";
-import { acceptOrder } from "../../redux/Store/actions";
+import { acceptOrder, changeState } from "../../redux/Store/actions";
 import { AccountTile } from "../../screens/Main/Accounts";
 import FbImage from "../Common/FbImage";
 import { Section } from "../Common/Section";
@@ -29,9 +29,12 @@ interface ProductProps {
 interface CardProps {
   id: string;
   state: {
+    cancelled: boolean;
     accepted: boolean;
+    date: string;
   };
   delivery: {
+    delivered: boolean;
     placed: string;
     expected: string;
   };
@@ -81,29 +84,31 @@ const ProductList = (props: ProductListProps): JSX.Element => {
             justifyContent: "space-between",
           }}
         >
-          <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "flex-start",
+              width: "60%",
+            }}
+          >
             {!props.card && (
               <View style={{ marginRight: 10 }}>
-                <FbImage
-                  og={false}
-                  dimension={40}
-                  url="https://picsum.photos/200"
-                />
+                <FbImage og={true} dimension={40} url={item.url} />
               </View>
             )}
             <Text
               style={{
                 fontSize: props.card ? Sizes.font.text : 16,
-                width: "70%",
+                width: "90%",
               }}
-              numberOfLines={1}
+              numberOfLines={props.card ? 1 : 2}
             >
               {item.name}
             </Text>
           </View>
           <View
             style={{
-              width: props.card ? "30%" : "40%",
+              width: "30%",
               justifyContent: "space-between",
               alignItems: "center",
               flexDirection: "row",
@@ -114,7 +119,7 @@ const ProductList = (props: ProductListProps): JSX.Element => {
                 fontSize: props.card ? Sizes.font.text : 16,
               }}
             >
-              x{item.quantity}
+              x{item.quantity.toString()}
             </Text>
             <Text
               style={{
@@ -192,10 +197,9 @@ const OrderCard = (props: CardProps): JSX.Element => {
         accepted: accept,
       },
       onCompleted(data) {
-        console.log(data);
         if (data.alterOrderState) {
-          if (accept) {
-            dispatch(acceptOrder({ ...props }));
+          if (!accept) {
+            dispatch(changeState(accept, props.id));
           }
         }
       },
@@ -209,10 +213,31 @@ const OrderCard = (props: CardProps): JSX.Element => {
     }
   );
 
+  if (props.state.cancelled) {
+    return (
+      <View
+        style={{
+          width: "100%",
+          padding: 5,
+          borderBottomWidth: 1,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderBottomColor: Colors.$textDisabled,
+        }}
+      >
+        <Text>Id: {"loc" + props.id.slice(15, -1)}</Text>
+        <BoldText red10>cancelled</BoldText>
+      </View>
+    );
+  }
+
   if (props.screen) {
     return (
       <View flex>
-        <Tracker deliverBy={new Date().toISOString()} />
+        {!props.delivery.delivered && (
+          <Tracker deliverBy={props.delivery.expected} />
+        )}
         <Section
           title="Address"
           body={
@@ -319,7 +344,7 @@ const OrderCard = (props: CardProps): JSX.Element => {
             </View>
           }
         />
-        {!props.payment.paid && (
+        {/* {!props.payment.paid && (
           <Section
             title="Account requesting"
             body={
@@ -339,7 +364,7 @@ const OrderCard = (props: CardProps): JSX.Element => {
               </View>
             }
           />
-        )}
+        )} */}
       </View>
     );
   }

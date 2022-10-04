@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export const GET_ORDER = gql`
-  query getOrder($id: String) {
+  query getOrder($id: String!) {
     getOrder(id: $id) {
       id
       products {
@@ -11,8 +11,11 @@ export const GET_ORDER = gql`
         totalAmount
       }
       state {
+        message
         order {
+          cancelled
           accepted
+          date
         }
         delivery {
           delivered
@@ -24,7 +27,6 @@ export const GET_ORDER = gql`
           }
           deliverBy
         }
-        cancelled
         payment {
           paid
           grandAmount
@@ -48,8 +50,11 @@ export const GET_ORDERS = gql`
         totalAmount
       }
       state {
+        message
         order {
+          cancelled
           accepted
+          date
         }
         delivery {
           delivered
@@ -61,7 +66,6 @@ export const GET_ORDERS = gql`
           }
           deliverBy
         }
-        cancelled
         payment {
           paid
           grandAmount
@@ -85,8 +89,11 @@ export const GET_NEW_ORDER = gql`
         totalAmount
       }
       state {
+        message
         order {
+          cancelled
           accepted
+          date
         }
         delivery {
           delivered
@@ -98,7 +105,6 @@ export const GET_NEW_ORDER = gql`
           }
           deliverBy
         }
-        cancelled
         payment {
           paid
           grandAmount
@@ -122,8 +128,11 @@ export const CREATE_ORDER = gql`
         totalAmount
       }
       state {
+        message
         order {
+          cancelled
           accepted
+          date
         }
         delivery {
           delivered
@@ -135,7 +144,6 @@ export const CREATE_ORDER = gql`
           }
           deliverBy
         }
-        cancelled
         payment {
           paid
           grandAmount

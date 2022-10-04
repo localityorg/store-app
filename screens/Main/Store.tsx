@@ -149,7 +149,9 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
               }
               body={
                 <FlatList
-                  data={orders}
+                  data={orders.filter(
+                    (order: any) => order.state.order.accepted === false
+                  )}
                   extraData={orders}
                   ListFooterComponentStyle={{ marginBottom: 200 }}
                   keyExtractor={(item: any) => item.id.toString()}
@@ -163,11 +165,12 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
                       id={item.id}
                       products={item.products}
                       delivery={{
+                        delivered: item.state.delivery.delivered,
                         placed: item.state.created.date,
                         expected: item.state.delivery.deliverBy,
                       }}
                       state={{
-                        accepted: item.state.order.accepted,
+                        accepted: item.state.order?.accepted || false,
                       }}
                       address={{
                         line: item.state.delivery.address.line,

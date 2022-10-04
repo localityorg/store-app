@@ -1,7 +1,12 @@
 import { useMutation, useQuery } from "@apollo/client";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
 import { Colors } from "react-native-ui-lib";
 import { useDispatch, useSelector } from "react-redux";
 import { DELIVERED_ORDER, GET_ORDER } from "../../apollo/graphql/Store/orders";
@@ -23,6 +28,7 @@ export default function OrderDetails({
   const dispatch: any = useDispatch();
 
   const { location } = useSelector((state: any) => state.locationReducer);
+  const { orders } = useSelector((state: any) => state.ordersReducer);
 
   const [permission, setPermission] = useState<string | null>(null);
   const [order, setOrder] = useState<any>();
@@ -75,7 +81,10 @@ export default function OrderDetails({
         }
       },
       onError(error) {
-        console.log({ ...error });
+        Alert.alert(
+          "Cannot change status",
+          `${error.graphQLErrors[0].message}`
+        );
       },
     }
   );
@@ -112,11 +121,12 @@ export default function OrderDetails({
             id={order.id}
             products={order.products}
             delivery={{
+              delivered: order.state.delivery.delivered,
               placed: order.state.created.date,
               expected: order.state.delivery.deliverBy,
             }}
             state={{
-              accepted: order.state.order.accepted,
+              accepted: order.state.order?.accepted || false,
             }}
             address={{
               line: order.state.delivery.address.line,
@@ -143,7 +153,7 @@ export default function OrderDetails({
         >
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={handleCancel}
+            onPress={() => {}}
             style={{
               flex: 1,
               height: "100%",

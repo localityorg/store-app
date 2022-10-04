@@ -70,7 +70,7 @@ export const setInventory = (inventory: any) => (dispatch: any) => {
 
 // all user orders
 export const SET_ORDERS = "SET_ORDERS";
-export const ACCEPT_ORDER = "ACCEPT_ORDER";
+export const CHANGE_STATE = "CHANGE_STATE";
 
 export const setOrders = (orders: any) => (dispatch: any) => {
   dispatch({
@@ -78,9 +78,12 @@ export const setOrders = (orders: any) => (dispatch: any) => {
     payload: orders,
   });
 };
-export const acceptOrder = (order: any) => (dispatch: any) => {
+export const changeState = (accept: boolean, id: string) => (dispatch: any) => {
   dispatch({
-    type: ACCEPT_ORDER,
-    payload: order,
+    type: CHANGE_STATE,
+    payload: {
+      accept,
+      id,
+    },
   });
 };

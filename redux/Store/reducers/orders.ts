@@ -1,4 +1,4 @@
-import { ACCEPT_ORDER, SET_ORDERS } from "../actions";
+import { CHANGE_STATE, SET_ORDERS } from "../actions";
 
 var orderState = {
   orders: [],
@@ -25,8 +25,17 @@ export function ordersReducer(state: any = orderState, action: any) {
   switch (action.type) {
     case SET_ORDERS:
       return { ...state, orders: stackPendingOrders(action.payload) };
-    case ACCEPT_ORDER:
-      return { ...state, lastOrder: action.payload };
+    case CHANGE_STATE:
+      if (!action.payload.accept) {
+        console.log(state.orders.length);
+        var updated = state.orders.filter(
+          (order: any) => order.id !== action.payload.id
+        );
+        console.log(updated.length);
+        return { ...state, orders: updated };
+      } else {
+        return state;
+      }
     default:
       return state;
   }
