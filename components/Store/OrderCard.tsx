@@ -1,58 +1,59 @@
 import { useMutation } from "@apollo/client";
 import { formatDistanceToNow, parseISO } from "date-fns";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
 import { Colors } from "react-native-ui-lib";
 import { useDispatch } from "react-redux";
-import { ACCEPT_ORDER } from "../../apollo/graphql/Store/orders";
+import { ALTER_STATE } from "../../apollo/graphql/Store/orders";
 import Sizes from "../../constants/Sizes";
-import { acceptOrder, changeState } from "../../redux/Store/actions";
+import { changeState } from "../../redux/Store/actions";
 import { AccountTile } from "../../screens/Main/Accounts";
-import FbImage from "../Common/FbImage";
+import Image from "../Common/Image";
 import { Section } from "../Common/Section";
 import { BoldText, Text } from "../Common/Text";
 import { View } from "../Themed";
 import Tracker from "./Tracker";
 
-interface ProductProps {
+export interface ProductProps {
   id: string;
   name: string;
-  url: string;
-  price: {
-    mrp: string;
-    discount?: string;
-  };
   quantity: string;
+  url: string;
   totalAmount: string;
 }
 
-interface CardProps {
+export interface OrderProps {
   id: string;
+  linkedAccount?: string;
   state: {
     cancelled: boolean;
-    accepted: boolean;
-    date: string;
-  };
-  delivery: {
-    delivered: boolean;
-    placed: string;
-    expected: string;
+    order: {
+      cancelled: boolean;
+      accepted: boolean;
+      date: string;
+    };
+    delivery: {
+      delivered: boolean;
+      deliverBy: string;
+      address: AddressProps;
+    };
+    payment: {
+      grandTotal: string;
+      paid: boolean;
+    };
   };
   products: Array<ProductProps>;
-  payment: {
-    grandTotal: string;
-    paid: boolean;
-  };
-  address: AddressProps;
   loading: boolean;
   onPress?: any;
   screen?: boolean;
   onBack?: any;
 }
 
-interface AddressProps {
+export interface AddressProps {
   line: string;
-  coordinates: [string, string];
+  location: {
+    coordinates: [string, string];
+  };
 }
 
 interface GrandTotalDeliveryProps {
@@ -93,7 +94,7 @@ const ProductList = (props: ProductListProps): JSX.Element => {
           >
             {!props.card && (
               <View style={{ marginRight: 10 }}>
-                <FbImage og={true} dimension={40} url={item.url} />
+                <Image og={true} dimension={40} url={item.url} />
               </View>
             )}
             <Text
@@ -185,12 +186,12 @@ const GrandTotalDeliveryCard = (
   );
 };
 
-const OrderCard = (props: CardProps): JSX.Element => {
+const OrderCard = (props: OrderProps): JSX.Element => {
   const dispatch: any = useDispatch();
   const [accept, setAccept] = useState<boolean>();
 
   const [acceptMutation, { loading: fetchingDecision }] = useMutation(
-    ACCEPT_ORDER,
+    ALTER_STATE,
     {
       variables: {
         id: props.id,
@@ -212,6 +213,17 @@ const OrderCard = (props: CardProps): JSX.Element => {
       },
     }
   );
+
+  useEffect(() => {
+    if (accept !== undefined) {
+      acceptMutation({
+        variables: {
+          id: props.id,
+          accepted: accept,
+        },
+      });
+    }
+  }, [accept]);
 
   if (props.state.cancelled) {
     return (
@@ -235,8 +247,8 @@ const OrderCard = (props: CardProps): JSX.Element => {
   if (props.screen) {
     return (
       <View flex>
-        {!props.delivery.delivered && (
-          <Tracker deliverBy={props.delivery.expected} />
+        {!props.state.delivery.delivered && (
+          <Tracker deliverBy={props.state.delivery.deliverBy} />
         )}
         <Section
           title="Address"
@@ -246,7 +258,7 @@ const OrderCard = (props: CardProps): JSX.Element => {
                 fontSize: 16,
               }}
             >
-              {props.address.line}
+              {props.state.delivery.address.line}
             </Text>
           }
         />
@@ -298,7 +310,7 @@ const OrderCard = (props: CardProps): JSX.Element => {
                       fontSize: 16,
                     }}
                   >
-                    Rs. {props.payment.grandTotal}/-
+                    Rs. {props.state.payment.grandTotal}/-
                   </Text>
                 </View>
               </View>
@@ -422,9 +434,12 @@ const OrderCard = (props: CardProps): JSX.Element => {
         }}
       >
         <Text>Id: {"loc" + props.id.slice(15, -1)}</Text>
-        <BoldText>
-          {formatDistanceToNow(parseISO(props.delivery.placed))} to go
-        </BoldText>
+        {!props.state.delivery.delivered && (
+          <BoldText>
+            {formatDistanceToNow(parseISO(props.state.delivery.deliverBy))} to
+            go
+          </BoldText>
+        )}
       </View>
       <View
         style={{
@@ -439,10 +454,10 @@ const OrderCard = (props: CardProps): JSX.Element => {
         <ProductList card={true} products={props.products} />
       </View>
       <GrandTotalDeliveryCard
-        address={props.address}
-        grandTotal={props.payment.grandTotal}
+        address={props.state.delivery.address}
+        grandTotal={props.state.payment.grandTotal}
       />
-      {!props.state.accepted && (
+      {!props.state.order.accepted && (
         <View
           style={{
             marginTop: 5,
@@ -453,14 +468,7 @@ const OrderCard = (props: CardProps): JSX.Element => {
           }}
         >
           <TouchableOpacity
-            onPress={() =>
-              acceptMutation({
-                variables: {
-                  id: props.id,
-                  accepted: false,
-                },
-              })
-            }
+            onPress={() => setAccept(false)}
             style={{
               flex: 1,
               height: "100%",
@@ -474,14 +482,7 @@ const OrderCard = (props: CardProps): JSX.Element => {
           </TouchableOpacity>
           <View style={{ width: 5 }} />
           <TouchableOpacity
-            onPress={() =>
-              acceptMutation({
-                variables: {
-                  id: props.id,
-                  accepted: true,
-                },
-              })
-            }
+            onPress={() => setAccept(true)}
             style={{
               flex: 1,
               height: "100%",

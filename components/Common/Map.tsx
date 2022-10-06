@@ -1,20 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
-import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
-import useColorScheme from "../../hooks/useColorScheme";
-import * as Location from "expo-location";
-import { View } from "../Themed";
-import { BoldText } from "./Text";
-import { lightMapStyle } from "../../constants/MapStyle";
-import { useDispatch, useSelector } from "react-redux";
-import { setLocation } from "../../redux/Common/actions";
+import { TouchableOpacity } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { Colors } from "react-native-ui-lib";
-import { TouchableOpacity } from "react-native";
+import * as Location from "expo-location";
+import MapView, { PROVIDER_DEFAULT } from "react-native-maps";
+import { useDispatch, useSelector } from "react-redux";
+
+import { View } from "../Themed";
+import { BoldText } from "./Text";
+
+import { setLocation } from "../../redux/Common/actions";
+import useColorScheme from "../../hooks/useColorScheme";
+
+import { lightMapStyle } from "../../constants/MapStyle";
 import Sizes from "../../constants/Sizes";
 
 interface MapProps {
   handleLocation?: any;
-  location?: any;
+  location?: [string, string];
   track?: boolean;
 }
 

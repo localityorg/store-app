@@ -1,6 +1,8 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "react-native-ui-lib";
-import FbImage from "../Common/FbImage";
+
+import Image from "../Common/Image";
+
 import { BoldText, Text } from "../Common/Text";
 import { View } from "../Themed";
 
@@ -29,7 +31,7 @@ const ProductTile = (props: ProductTileProps): JSX.Element => {
         borderColor: Colors.$backgroundDisabled + "55",
       }}
     >
-      <FbImage og={false} url={props.url} dimension={props.dimension} />
+      <Image og={false} url={props.url} dimension={props.dimension} />
       <LinearGradient
         colors={[
           Colors.$backgroundDefault + "00",
@@ -47,14 +49,6 @@ const ProductTile = (props: ProductTileProps): JSX.Element => {
           justifyContent: "space-between",
           padding: 5,
           height: 60,
-          // shadowColor: "#000",
-          // shadowOffset: {
-          //   width: 0,
-          //   height: 2,
-          // },
-          // shadowOpacity: 0.25,
-          // shadowRadius: 3.84,
-          // elevation: 5,
         }}
       >
         <BoldText>x{props.count}</BoldText>

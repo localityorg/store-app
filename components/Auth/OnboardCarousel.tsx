@@ -8,8 +8,8 @@ const OnboardCarousel = (props: OnboardCarouselProps): JSX.Element => {
   return (
     <View flex padding-25 center>
       <Image
-        source={{ uri: "https://picsum.photos/220" }}
-        style={{ height: 200, width: 200 }}
+        source={require("../../assets/images/adaptive-icon.png")}
+        style={{ height: 400, width: 400 }}
       />
     </View>
   );

@@ -7,14 +7,14 @@ import {
   FlatList,
   TouchableOpacity,
 } from "react-native";
-import { Colors } from "react-native-ui-lib";
+import { Button, Colors } from "react-native-ui-lib";
 import { useDispatch, useSelector } from "react-redux";
 import { DELIVERED_ORDER, GET_ORDER } from "../../apollo/graphql/Store/orders";
 
 import { Header } from "../../components/Common/Header";
 import Screen from "../../components/Common/Screen";
 import { BoldText } from "../../components/Common/Text";
-import OrderCard from "../../components/Store/OrderCard";
+import OrderCard, { OrderProps } from "../../components/Store/OrderCard";
 import { View } from "../../components/Themed";
 import { setLocation } from "../../redux/Common/actions";
 
@@ -28,10 +28,9 @@ export default function OrderDetails({
   const dispatch: any = useDispatch();
 
   const { location } = useSelector((state: any) => state.locationReducer);
-  const { orders } = useSelector((state: any) => state.ordersReducer);
 
   const [permission, setPermission] = useState<string | null>(null);
-  const [order, setOrder] = useState<any>();
+  const [order, setOrder] = useState<OrderProps | undefined>();
 
   const { loading } = useQuery(GET_ORDER, {
     variables: {
@@ -89,6 +88,28 @@ export default function OrderDetails({
     }
   );
 
+  if (permission !== "granted") {
+    return (
+      <View flex center>
+        <View width-50 centerH>
+          <BoldText center text70>
+            You need to give location access in order to view Order Details
+          </BoldText>
+          <Button
+            label={"Refresh"}
+            disabled={false}
+            size={Button.sizes.large}
+            backgroundColor={Colors.$backgroundDark}
+            round={false}
+            marginT-10
+            borderRadius={10}
+            onPress={askForLocationPermission}
+          />
+        </View>
+      </View>
+    );
+  }
+
   if (loading || order === undefined) {
     return (
       <View center flex>
@@ -120,22 +141,7 @@ export default function OrderDetails({
             onPress={() => {}}
             id={order.id}
             products={order.products}
-            delivery={{
-              delivered: order.state.delivery.delivered,
-              placed: order.state.created.date,
-              expected: order.state.delivery.deliverBy,
-            }}
-            state={{
-              accepted: order.state.order?.accepted || false,
-            }}
-            address={{
-              line: order.state.delivery.address.line,
-              coordinates: order.state.delivery.address.location.coordinates,
-            }}
-            payment={{
-              grandTotal: order.state.payment.grandAmount,
-              paid: order.state.payment.paid,
-            }}
+            state={order.state}
             loading={loading}
             screen={true}
           />

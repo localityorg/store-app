@@ -1,10 +1,11 @@
 import { ActivityIndicator, TouchableOpacity } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
-
 import { Colors } from "react-native-ui-lib";
-import Sizes from "../../constants/Sizes";
+
 import { View } from "../Themed";
 import { Text } from "./Text";
+
+import Sizes from "../../constants/Sizes";
 
 interface ButtonProps {
   onPress: any;
@@ -53,14 +54,7 @@ export default function Button(props: ButtonProps) {
               style={{ marginRight: 10 }}
             />
           )}
-          <Text
-            style={{
-              color: Colors.text,
-              fontSize: Sizes.font.text,
-            }}
-          >
-            {props.label}
-          </Text>
+          <Text text70>{props.label}</Text>
         </View>
       )}
     </TouchableOpacity>

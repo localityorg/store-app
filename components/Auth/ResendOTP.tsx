@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { TouchableOpacity } from "react-native";
-
 import { differenceInMinutes, differenceInSeconds } from "date-fns";
 
-import { TWOFACTOR_AUTH } from "../../apollo/graphql/Common/auth";
 import { View } from "../Themed";
 import { BoldText, Text } from "../Common/Text";
-import Sizes from "../../constants/Sizes";
 
 interface ResendOTPProps {
   date: string;
@@ -53,12 +50,7 @@ export default function ResendOTP(props: ResendOTPProps) {
     >
       {timer.over ? (
         <TouchableOpacity onPress={props.onNew}>
-          <BoldText
-            style={{
-              textDecorationLine: "underline",
-              fontSize: Sizes.font.text,
-            }}
-          >
+          <BoldText underline text70>
             Resend Code
           </BoldText>
         </TouchableOpacity>
@@ -69,7 +61,7 @@ export default function ResendOTP(props: ResendOTPProps) {
           }}
         >
           Request New Code in{" "}
-          <BoldText style={{ fontSize: Sizes.font.text }}>
+          <BoldText text70>
             {timer.min} <Text>m</Text> {timer.sec} <Text>s</Text>
           </BoldText>
         </Text>

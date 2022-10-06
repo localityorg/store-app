@@ -1,22 +1,20 @@
 import React, { useState } from "react";
-
 import { useLazyQuery, useMutation } from "@apollo/client";
-
-import { Header } from "../../components/Common/Header";
-import Screen from "../../components/Common/Screen";
-import { Text } from "../../components/Common/Text";
-import Sizes from "../../constants/Sizes";
-
-import { CHECK_AUTH, TWOFACTOR_AUTH } from "../../apollo/graphql/Common/auth";
-import { OTPInput } from "../../components/Auth/OTPInput";
-import { LOGIN_USER } from "../../apollo/graphql/Common/user";
 import { Alert } from "react-native";
 import { useDispatch } from "react-redux";
-import { setUser } from "../../redux/Common/actions";
-import ContactInput from "../../components/Auth/ContactInput";
 
-import { AuthStackScreenProps } from "../../types";
+import Screen from "../../components/Common/Screen";
+import ContactInput from "../../components/Auth/ContactInput";
+import { Header } from "../../components/Common/Header";
+import { Text } from "../../components/Common/Text";
+import { OTPInput } from "../../components/Auth/OTPInput";
+
+import { setUser } from "../../redux/Common/actions";
 import { setStore } from "../../redux/Store/actions";
+
+import { TWOFACTOR_AUTH } from "../../apollo/graphql/Common/auth";
+import { LOGIN_USER } from "../../apollo/graphql/Common/user";
+import { AuthStackScreenProps } from "../../types";
 
 export default function Login({ navigation }: AuthStackScreenProps<"Login">) {
   const [contact, setContact] = useState({
@@ -77,9 +75,7 @@ export default function Login({ navigation }: AuthStackScreenProps<"Login">) {
             setMeta({ ...meta, tfScreen: false });
           }}
         />
-        <Text style={{ fontSize: Sizes.font.text }}>
-          Enter 6 digit code sent to your registered number.
-        </Text>
+        <Text text70>Enter 6 digit code sent to your registered number.</Text>
         <OTPInput
           date={meta.date}
           onNew={() =>
@@ -106,9 +102,7 @@ export default function Login({ navigation }: AuthStackScreenProps<"Login">) {
   return (
     <Screen>
       <Header title="Login" onBack={() => navigation.navigate("Onboarding")} />
-      <Text style={{ fontSize: Sizes.font.text }}>
-        Welcome back! Login with your registered number.
-      </Text>
+      <Text text70>Welcome back! Login with your registered number.</Text>
       <ContactInput
         contact={contact}
         loading={tfAuthing}

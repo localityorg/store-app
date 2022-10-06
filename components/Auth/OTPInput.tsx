@@ -13,8 +13,8 @@ interface OTPProps {
     ISD: string;
     number: string;
   };
-  onNext: any;
   date: string;
+  onNext: any;
   onNew: any;
 }
 
@@ -58,9 +58,7 @@ export function OTPInput(props: OTPProps) {
         }}
         flex
       >
-        <BoldText style={{ fontSize: Sizes.font.text }}>
-          One Time Paassword
-        </BoldText>
+        <BoldText text70>One Time Paassword</BoldText>
         <OTPInputView
           style={{ width: "100%", height: 90 }}
           pinCount={6}

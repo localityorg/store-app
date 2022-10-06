@@ -1,25 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { FlatList, RefreshControl } from "react-native";
+import { Colors } from "react-native-ui-lib";
+import { NetworkStatus, useQuery } from "@apollo/client";
+import { useDispatch, useSelector } from "react-redux";
 
-import { Section } from "../../components/Common/Section";
 import Screen from "../../components/Common/Screen";
-import OrderCard from "../../components/Store/OrderCard";
+import { Section } from "../../components/Common/Section";
+import { BoldText } from "../../components/Common/Text";
+import { View } from "../../components/Themed";
+
+import OrderCard, { OrderProps } from "../../components/Store/OrderCard";
 import Stats from "../../components/Store/Stats";
 import TabHeader from "../../components/Store/TabHeader";
 
-import { Colors } from "react-native-ui-lib";
+import { GET_STORE, STORE_UPDATE } from "../../apollo/graphql/Store/store";
+import { setStore } from "../../redux/Store/actions";
 
 import { RootTabScreenProps } from "../../types";
-import { useQuery } from "@apollo/client";
-import { GET_STORE, STORE_UPDATE } from "../../apollo/graphql/Store/store";
-import { useDispatch, useSelector } from "react-redux";
-import { setStore } from "../../redux/Store/actions";
-import { BoldText, Text } from "../../components/Common/Text";
-import { View } from "../../components/Themed";
 
 export default function Store({ navigation }: RootTabScreenProps<"Store">) {
-  const [pending, setPending] = useState([]);
-
   const { store } = useSelector((state: any) => state.storeReducer);
   const { orders } = useSelector((state: any) => state.ordersReducer);
   const { user } = useSelector((state: any) => state.userReducer);
@@ -33,6 +32,7 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
     networkStatus,
   } = useQuery(GET_STORE, {
     onCompleted(data) {
+      console.log(data);
       if (data.getStore) {
         dispatch(setStore(data.getStore));
       }
@@ -83,7 +83,7 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
       />
       <FlatList
         data={[1]}
-        refreshing={networkStatus === 4 || fetchingStore}
+        refreshing={NetworkStatus.loading == 1 || fetchingStore}
         refreshControl={
           <RefreshControl
             refreshing={fetchingStore}
@@ -154,7 +154,7 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
                   )}
                   extraData={orders}
                   ListFooterComponentStyle={{ marginBottom: 200 }}
-                  keyExtractor={(item: any) => item.id.toString()}
+                  keyExtractor={(item: OrderProps) => item.id.toString()}
                   renderItem={({ item }) => (
                     <OrderCard
                       onPress={() =>
@@ -164,25 +164,7 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
                       }
                       id={item.id}
                       products={item.products}
-                      delivery={{
-                        delivered: item.state.delivery.delivered,
-                        placed: item.state.created.date,
-                        expected: item.state.delivery.deliverBy,
-                      }}
-                      state={{
-                        accepted: item.state.order?.accepted || false,
-                      }}
-                      address={{
-                        line: item.state.delivery.address.line,
-                        coordinates: [
-                          "item.state.delivery.address.location.coordinates",
-                          "",
-                        ],
-                      }}
-                      payment={{
-                        grandTotal: item.state.payment.grandAmount,
-                        paid: item.state.payment.paid,
-                      }}
+                      state={item.state}
                       loading={false}
                       screen={false}
                     />

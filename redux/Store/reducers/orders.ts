@@ -1,3 +1,4 @@
+import { OrderProps } from "../../../components/Store/OrderCard";
 import { CHANGE_STATE, SET_ORDERS } from "../actions";
 
 var orderState = {
@@ -6,14 +7,14 @@ var orderState = {
   lastOrder: null,
 };
 
-function stackPendingOrders(orders: Array<[]>) {
+function stackPendingOrders(orders: Array<OrderProps>) {
   var stack = [...orders];
 
   var pending = orders.filter(
     (order: any) => order.state.order.accepted === false
   );
 
-  pending.forEach((order: any) => {
+  pending.forEach((order: OrderProps) => {
     const index = stack.findIndex((o: any) => o.id === order.id);
     stack.splice(index, 1);
   });
@@ -27,11 +28,9 @@ export function ordersReducer(state: any = orderState, action: any) {
       return { ...state, orders: stackPendingOrders(action.payload) };
     case CHANGE_STATE:
       if (!action.payload.accept) {
-        console.log(state.orders.length);
         var updated = state.orders.filter(
           (order: any) => order.id !== action.payload.id
         );
-        console.log(updated.length);
         return { ...state, orders: updated };
       } else {
         return state;

@@ -1,23 +1,25 @@
-import { AntDesign } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
+import { Keyboard } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import { Button, Colors, TouchableOpacity, View } from "react-native-ui-lib";
 import * as Location from "expo-location";
+import { useDispatch, useSelector } from "react-redux";
+
+import Screen from "../../components/Common/Screen";
+import ContactInput from "../../components/Auth/ContactInput";
 import { Header } from "../../components/Common/Header";
 import { TextInput } from "../../components/Common/Input";
 import { Map } from "../../components/Common/Map";
-import Screen from "../../components/Common/Screen";
 import { Text } from "../../components/Common/Text";
-import Sizes from "../../constants/Sizes";
-
-import { Alert, Keyboard } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { AuthStackScreenProps } from "../../types";
-import ContactInput from "../../components/Auth/ContactInput";
-import { useLazyQuery, useMutation } from "@apollo/client";
-import { EDIT_STORE } from "../../apollo/graphql/Store/store";
 import { OTPInput } from "../../components/Auth/OTPInput";
-import { TWOFACTOR_AUTH } from "../../apollo/graphql/Common/auth";
+
 import { setLocation, setUser } from "../../redux/Common/actions";
+
+import Sizes from "../../constants/Sizes";
+import { TWOFACTOR_AUTH } from "../../apollo/graphql/Common/auth";
+import { EDIT_STORE } from "../../apollo/graphql/Store/store";
+import { AuthStackScreenProps } from "../../types";
 
 export default function Register({
   navigation,
@@ -175,7 +177,7 @@ export default function Register({
         {meta.mapScreen ? (
           <>
             <View flex>
-              <Text style={{ fontSize: Sizes.font.text }}>
+              <Text text70>
                 Enter your store address below. Drag marker to point precise
                 store location.
               </Text>
@@ -300,9 +302,7 @@ export default function Register({
         ) : (
           <>
             <View flex>
-              <Text style={{ fontSize: Sizes.font.text }}>
-                Enter your store details below.
-              </Text>
+              <Text text70>Enter your store details below.</Text>
               {/* <InputText
             value={storeInfo.licenseNumber}
             onChange={(text: string) =>
@@ -386,9 +386,7 @@ export default function Register({
             setMeta({ ...meta, tfaScreen: false });
           }}
         />
-        <Text style={{ fontSize: Sizes.font.text }}>
-          Enter 6 digit code sent to your registered number.
-        </Text>
+        <Text text70>Enter 6 digit code sent to your registered number.</Text>
         <OTPInput
           contact={contact}
           date={meta.date}
@@ -412,9 +410,7 @@ export default function Register({
     return (
       <Screen>
         <View center>
-          <Text style={{ fontSize: Sizes.font.text }}>
-            Getting store registeration confirmation ...
-          </Text>
+          <Text text70>Getting store registeration confirmation ...</Text>
         </View>
       </Screen>
     );
@@ -426,9 +422,7 @@ export default function Register({
         title="Register"
         onBack={() => navigation.navigate("Onboarding")}
       />
-      <Text style={{ fontSize: Sizes.font.text }}>
-        Join with an unregistered mobile number.
-      </Text>
+      <Text text70>Join with an unregistered mobile number.</Text>
       <ContactInput
         error={error}
         contact={contact}

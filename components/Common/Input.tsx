@@ -1,17 +1,17 @@
+import { useState } from "react";
 import {
   StyleSheet,
   TextInput as DefaultTextInput,
   TextInputProps,
 } from "react-native";
-
 import { useFonts } from "expo-font";
 import { Colors } from "react-native-ui-lib";
-import { useState } from "react";
+import { AntDesign } from "@expo/vector-icons";
+
 import { View } from "../Themed";
 import { BoldText, Text } from "./Text";
+
 import Sizes from "../../constants/Sizes";
-import { AntDesign } from "@expo/vector-icons";
-import { CommonStyles } from "./Styles";
 
 export function TextInput(props: TextInputProps) {
   const { style, ...otherProps } = props;
@@ -75,8 +75,8 @@ export function InputText(props: InputProps) {
             : focus
             ? Colors.primary
             : Colors.$textDefault,
-          fontSize: Sizes.font.text,
         }}
+        text70
       >
         {props.title}
       </BoldText>
@@ -104,8 +104,26 @@ export function InputText(props: InputProps) {
         {props.locked && <AntDesign name="lock1" size={Sizes.icon.normal} />}
       </View>
       {props.error && (
-        <View style={CommonStyles.errorContainer}>
-          <Text style={CommonStyles.errorText}>{props.errorMessage}</Text>
+        <View
+          style={{
+            width: "100%",
+            padding: 10,
+            alignSelf: "center",
+            borderRadius: 10,
+            alignItems: "center",
+            justifyContent: "center",
+            marginVertical: 5,
+          }}
+        >
+          <Text
+            style={{
+              color: "#dd0000",
+              fontSize: 14,
+              textAlign: "center",
+            }}
+          >
+            {props.errorMessage}
+          </Text>
         </View>
       )}
     </View>

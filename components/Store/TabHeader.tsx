@@ -1,10 +1,12 @@
-import { AntDesign } from "@expo/vector-icons";
 import React from "react";
+import { AntDesign } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native";
 import { Colors } from "react-native-ui-lib";
-import Sizes from "../../constants/Sizes";
+
 import { BoldText } from "../Common/Text";
 import { View } from "../Themed";
+
+import Sizes from "../../constants/Sizes";
 
 interface TabHeaderProps {
   icon: React.ComponentProps<typeof AntDesign>["name"];

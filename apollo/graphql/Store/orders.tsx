@@ -19,6 +19,9 @@ export const GET_ORDER = gql`
         }
         delivery {
           delivered
+          deliveredAt
+          dispatched
+          dispatchedAt
           address {
             line
             location {
@@ -58,6 +61,9 @@ export const GET_ORDERS = gql`
         }
         delivery {
           delivered
+          deliveredAt
+          dispatched
+          dispatchedAt
           address {
             line
             location {
@@ -97,6 +103,9 @@ export const GET_NEW_ORDER = gql`
         }
         delivery {
           delivered
+          deliveredAt
+          dispatched
+          dispatchedAt
           address {
             line
             location {
@@ -121,42 +130,11 @@ export const CREATE_ORDER = gql`
   mutation createOrder($orderInfo: OrderInfo) {
     createOrder(orderInfo: $orderInfo) {
       id
-      products {
-        name
-        url
-        quantity
-        totalAmount
-      }
-      state {
-        message
-        order {
-          cancelled
-          accepted
-          date
-        }
-        delivery {
-          delivered
-          address {
-            line
-            location {
-              coordinates
-            }
-          }
-          deliverBy
-        }
-        payment {
-          paid
-          grandAmount
-        }
-        created {
-          date
-        }
-      }
     }
   }
 `;
 
-export const ACCEPT_ORDER = gql`
+export const ALTER_STATE = gql`
   mutation alterOrderState($id: String!, $accepted: Boolean!) {
     alterOrderState(id: $id, accepted: $accepted)
   }

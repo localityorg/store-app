@@ -2,9 +2,9 @@ import React from "react";
 import { StatusBar, ViewProps } from "react-native";
 import { Colors } from "react-native-ui-lib";
 
-import useColorScheme from "../../hooks/useColorScheme";
-
 import { View } from "../Themed";
+
+import useColorScheme from "../../hooks/useColorScheme";
 
 const Screen = (props: ViewProps): JSX.Element => {
   const colorScheme = useColorScheme();

@@ -157,25 +157,7 @@ export default function Orders({ navigation }: RootTabScreenProps<"Orders">) {
                 }
                 id={item.id}
                 products={item.products}
-                delivery={{
-                  delivered: item.state.delivery.delivered,
-                  placed: item.state.created.date,
-                  expected: item.state.delivery.deliverBy,
-                }}
-                state={{
-                  accepted: item.state.order?.accepted,
-                }}
-                address={{
-                  line: item.state.delivery.address.line,
-                  coordinates: [
-                    "item.state.delivery.address.location.coordinates",
-                    "",
-                  ],
-                }}
-                payment={{
-                  grandTotal: item.state.payment.grandAmount,
-                  paid: item.state.payment.paid,
-                }}
+                state={item.state}
                 loading={false}
                 screen={false}
               />

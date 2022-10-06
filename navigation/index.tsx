@@ -29,7 +29,6 @@ import QuickBill from "../screens/Main/QuickBill";
 import Store from "../screens/Main/Store";
 import StoreEdit from "../screens/Main/StoreEdit";
 
-import ModalScreen from "../screens/ModalScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
 
 import {
@@ -80,7 +79,6 @@ function RootNavigator() {
       <Stack.Group
         screenOptions={{ presentation: "modal", headerShown: false }}
       >
-        <Stack.Screen name="Modal" component={ModalScreen} />
         <Stack.Screen
           name="OrderDetails"
           component={OrderDetails}

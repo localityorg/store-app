@@ -1,3 +1,5 @@
+import { OrderProps } from "../../components/Store/OrderCard";
+
 // all user
 export const ADD_CART_ITEM = "ADD_CART_ITEM";
 export const REMOVE_CART_ITEM = "REMOVE_CART_ITEM";
@@ -72,7 +74,7 @@ export const setInventory = (inventory: any) => (dispatch: any) => {
 export const SET_ORDERS = "SET_ORDERS";
 export const CHANGE_STATE = "CHANGE_STATE";
 
-export const setOrders = (orders: any) => (dispatch: any) => {
+export const setOrders = (orders: Array<OrderProps>) => (dispatch: any) => {
   dispatch({
     type: SET_ORDERS,
     payload: orders,

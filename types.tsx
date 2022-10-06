@@ -21,7 +21,9 @@ export type RootStackParamList = {
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
   Modal: undefined;
   Profile: undefined;
-  OrderDetails: undefined;
+  OrderDetails: {
+    id?: string;
+  };
   Accounts: undefined;
   StoreEdit: undefined;
   NotFound: undefined;

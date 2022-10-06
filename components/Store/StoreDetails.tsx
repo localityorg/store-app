@@ -1,25 +1,19 @@
 import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Colors,
-  Incubator,
-  TouchableOpacity,
-  View,
-} from "react-native-ui-lib";
-import { Header } from "../../components/Common/Header";
-import { InputText, TextInput } from "../../components/Common/Input";
-import { Map } from "../../components/Common/Map";
-import { Text } from "../../components/Common/Text";
-
-import Screen from "../../components/Common/Screen";
-import Sizes from "../../constants/Sizes";
-
+import { Button, Colors, TouchableOpacity, View } from "react-native-ui-lib";
 import { AntDesign } from "@expo/vector-icons";
 import { Keyboard } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useMutation } from "@apollo/client";
-import { EDIT_STORE, REGISTER_STORE } from "../../apollo/graphql/Store/store";
+
+import { TextInput } from "../../components/Common/Input";
+import { Map } from "../../components/Common/Map";
+import { Text } from "../../components/Common/Text";
+import Screen from "../../components/Common/Screen";
+
 import { setStore } from "../../redux/Store/actions";
+
+import { EDIT_STORE } from "../../apollo/graphql/Store/store";
+import Sizes from "../../constants/Sizes";
 
 interface DetailProps {
   onNext?: any;
@@ -73,30 +67,27 @@ const StoreDetails = (props: DetailProps): JSX.Element => {
     },
   });
 
-  const [editStore, { loading: confirming }] = useMutation(
-    data.edit ? EDIT_STORE : REGISTER_STORE,
-    {
-      variables: {
-        edit: data.edit,
-        storeInfo: {
-          name: data.storeInfo.name,
-          contact: user.contact,
-          address: data.storeInfo.address,
-        },
+  const [editStore, { loading: confirming }] = useMutation(EDIT_STORE, {
+    variables: {
+      edit: data.edit,
+      storeInfo: {
+        name: data.storeInfo.name,
+        contact: user.contact,
+        address: data.storeInfo.address,
       },
-      onCompleted(data) {
-        if (data.editStore) {
-          dispatch(setStore(data.editStore));
-          {
-            props.onNext && props.onNext();
-          }
+    },
+    onCompleted(data) {
+      if (data.editStore) {
+        dispatch(setStore(data.editStore));
+        {
+          props.onNext && props.onNext();
         }
-      },
-      onError(error) {
-        console.log({ ...error });
-      },
-    }
-  );
+      }
+    },
+    onError(error) {
+      console.log({ ...error });
+    },
+  });
 
   if (confirming) {
     return (
@@ -112,7 +103,7 @@ const StoreDetails = (props: DetailProps): JSX.Element => {
     return (
       <>
         <View flex>
-          <Text style={{ fontSize: Sizes.font.text }}>
+          <Text text70>
             Enter your store address below. Drag marker to point precise store
             location.
           </Text>
@@ -206,9 +197,7 @@ const StoreDetails = (props: DetailProps): JSX.Element => {
   return (
     <>
       <View flex>
-        <Text style={{ fontSize: Sizes.font.text }}>
-          Enter your store details below.
-        </Text>
+        <Text text70>Enter your store details below.</Text>
         {/* <InputText
             value={storeInfo.licenseNumber}
             onChange={(text: string) =>

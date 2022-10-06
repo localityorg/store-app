@@ -1,13 +1,13 @@
 import { ImageLoader } from "react-native-image-fallback";
 import { ICON_URL, IMG_URL } from "../../constants/Network";
 
-interface FbImageProps {
+interface ImageProps {
   og: boolean;
   url: string;
   dimension: number;
 }
 
-const FbImage = (props: FbImageProps): JSX.Element => {
+const Image = (props: ImageProps): JSX.Element => {
   return (
     <ImageLoader
       source={(props.og ? `${IMG_URL}/` : "") + `${props.url}`}
@@ -21,4 +21,4 @@ const FbImage = (props: FbImageProps): JSX.Element => {
   );
 };
 
-export default FbImage;
+export default Image;

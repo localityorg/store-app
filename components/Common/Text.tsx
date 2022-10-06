@@ -1,8 +1,3 @@
-/**
- * Learn more about Light and Dark modes:
- * https://docs.expo.io/guides/color-schemes/
- */
-
 import { Colors, Text as DefaultText, TextProps } from "react-native-ui-lib";
 
 import { useFonts } from "expo-font";

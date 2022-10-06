@@ -1,8 +1,9 @@
 import { TouchableOpacity } from "react-native";
-
 import { Colors } from "react-native-ui-lib";
-import Sizes from "../../constants/Sizes";
+
 import { Text } from "./Text";
+
+import Sizes from "../../constants/Sizes";
 
 interface CategoryBtnProps {
   onPress: any;

@@ -1,10 +1,11 @@
-import { AntDesign } from "@expo/vector-icons";
 import { ActivityIndicator, TouchableOpacity } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
 import { Colors } from "react-native-ui-lib";
-import Sizes from "../../constants/Sizes";
+
 import { View } from "../Themed";
-import { CommonStyles } from "./Styles";
 import { BoldText, Text } from "./Text";
+
+import Sizes from "../../constants/Sizes";
 
 interface SectionProps {
   title: string;
@@ -18,11 +19,27 @@ interface SectionProps {
 
 export function Section(props: SectionProps) {
   return (
-    <View style={CommonStyles.section}>
-      <View style={CommonStyles.sectionHeaderRow}>
-        <BoldText style={CommonStyles.sectionHeader} text70>
-          {props.title}
-        </BoldText>
+    <View
+      style={{
+        flexDirection: "column",
+        width: "100%",
+        marginBottom: 20,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: "transparent",
+        backgroundColor: "transparent",
+      }}
+    >
+      <View
+        style={{
+          width: "100%",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          backgroundColor: "transparent",
+        }}
+      >
+        <BoldText text70>{props.title}</BoldText>
         {props.icon && (
           <TouchableOpacity onPress={props.onPressIcon}>
             <AntDesign
@@ -37,16 +54,15 @@ export function Section(props: SectionProps) {
         )}
       </View>
       {props.subtitle && (
-        <Text style={CommonStyles.sectionText} text70>
+        <Text marginB-5 text70>
           {props.subtitle}
         </Text>
       )}
-
       <View
+        marginT-5
         style={{
           flexDirection: props.horizontal ? "row" : "column",
           backgroundColor: "transparent",
-          marginTop: 5,
         }}
       >
         {props.body}

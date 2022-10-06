@@ -1,10 +1,10 @@
 import React from "react";
+import { Button, Colors } from "react-native-ui-lib";
+
 import Screen from "../../components/Common/Screen";
 import OnboardCarousel from "../../components/Auth/OnboardCarousel";
-import { Button, Colors } from "react-native-ui-lib";
-import { AuthStackScreenProps } from "../../types";
 
-interface OnboardingProps {}
+import { AuthStackScreenProps } from "../../types";
 
 const Onboarding = ({
   navigation,

@@ -1,19 +1,19 @@
+import { useEffect, useState } from "react";
+import { TouchableOpacity } from "react-native";
+import * as Location from "expo-location";
 import {
   differenceInDays,
   differenceInHours,
   differenceInMinutes,
   differenceInSeconds,
 } from "date-fns";
-import { useEffect, useState } from "react";
-import { TouchableOpacity } from "react-native";
-import * as Location from "expo-location";
+import { useDispatch } from "react-redux";
+import { Colors } from "react-native-ui-lib";
 
+import { View } from "../Themed";
 import { BoldText, Text } from "../Common/Text";
 
 import { setLocation } from "../../redux/Common/actions";
-import { useDispatch } from "react-redux";
-import { Colors } from "react-native-ui-lib";
-import { View } from "../Themed";
 
 interface TrackerProps {
   deliverBy: string;

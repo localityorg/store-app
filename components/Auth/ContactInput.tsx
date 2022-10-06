@@ -1,12 +1,13 @@
 import React from "react";
 import { ActivityIndicator, TouchableOpacity } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
-
 import { Colors } from "react-native-ui-lib";
-import { View } from "../Themed";
+
 import { BoldText, Text } from "../Common/Text";
-import Sizes from "../../constants/Sizes";
 import { TextInput } from "../Common/Input";
+import { View } from "../Themed";
+
+import Sizes from "../../constants/Sizes";
 
 interface ContactInputProps {
   contact: {
@@ -37,9 +38,7 @@ export default function ContactInput(props: ContactInputProps) {
           height: 70,
         }}
       >
-        <BoldText style={{ fontSize: Sizes.font.text }}>
-          Contact Number
-        </BoldText>
+        <BoldText text70>Contact Number</BoldText>
         <View
           style={{
             flex: 1,
@@ -107,8 +106,8 @@ export default function ContactInput(props: ContactInputProps) {
               padding: 5,
               backgroundColor: Colors.$backgroundDangerLight,
               color: Colors.$iconDanger,
-              fontSize: Sizes.font.text,
             }}
+            text70
           >
             {props.error.message}
           </Text>
