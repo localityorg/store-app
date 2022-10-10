@@ -3,19 +3,32 @@ import { gql } from "@apollo/client";
 const PRODUCT_FRAGMENT = gql`
   fragment ProductDetail on Product {
     id
-    brand
+    url
     name
-    sku {
+    quantity {
+      count
+      type
+    }
+    price {
+      mrp
+      discount
+    }
+  }
+`;
+
+export const SEARCH_PRODUCTS = gql`
+  query SearchProducts($name: String, $limit: Int) {
+    getProducts(name: $name, limit: $limit) {
       id
-      url
       name
-      quantity {
-        count
-        type
-      }
+      url
       price {
         mrp
         discount
+      }
+      quantity {
+        count
+        type
       }
     }
   }
@@ -23,8 +36,8 @@ const PRODUCT_FRAGMENT = gql`
 
 export const GET_PRODUCT = gql`
   ${PRODUCT_FRAGMENT}
-  query getProduct($id: String)_ {
-    getProduct(id: $id) {
+  query getProduct($storeId: String!, $barcode: String!) {
+    getProduct(storeId: $storeId, barcode: $barcode) {
       ...ProductDetail
     }
   }
@@ -35,6 +48,24 @@ export const getProducts = gql`
   query getProducts($name: String) {
     getProducts(name: $name) {
       ...ProductDetail
+    }
+  }
+`;
+
+export const EDIT_PRODUCT = gql`
+  mutation EditProduct($id: String!, $barcode: String!, $url: String) {
+    editProduct(id: $id, barcode: $barcode, url: $url) {
+      id
+      name
+      url
+      price {
+        mrp
+        discount
+      }
+      quantity {
+        count
+        type
+      }
     }
   }
 `;

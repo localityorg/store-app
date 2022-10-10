@@ -9,14 +9,12 @@ var cartState = {
 const sortCart = (cart: any) => {
   var tempArray: any[] = [];
   var sortedCart: any[] = [];
-
   cart?.forEach((item: any) => {
     var i = tempArray.findIndex((x) => x.id == item.id);
     if (i <= -1) {
       tempArray.push(item);
     }
   });
-
   tempArray.map((obj: any) => {
     const count = cart.filter((e: any) => e.id === obj.id).length;
 
@@ -28,6 +26,7 @@ const sortCart = (cart: any) => {
     });
   });
 
+  sortedCart.sort((a, b) => a.id - b.id);
   return sortedCart;
 };
 
@@ -37,7 +36,7 @@ function addToCart(fetchedData: any) {
     name: fetchedData.name,
     brand: fetchedData.brand,
     quantity: fetchedData.quantity,
-    imageUrl: fetchedData.imageUrl,
+    url: fetchedData.url,
     price: fetchedData.price,
   };
   cartState.tempCart.push(itemToAdd);
@@ -52,7 +51,6 @@ function removeFromCart(fetchedData: any) {
     cart.splice(indEx, 1);
     cartState.tempCart = cart;
   }
-
   return sortCart(cart);
 }
 
@@ -78,7 +76,7 @@ export function cartReducer(state: any = cartState, action: any) {
       return { ...state, cart: newItemCart };
     case EMPTY_CART:
       emptyCart();
-      return { ...state, cart: action.payload };
+      return { ...state, cart: [] };
     default:
       return state;
   }

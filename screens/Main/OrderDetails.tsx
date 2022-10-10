@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Button, Colors } from "react-native-ui-lib";
 import { useDispatch, useSelector } from "react-redux";
-import { DELIVERED_ORDER, GET_ORDER } from "../../apollo/graphql/Store/orders";
+import { ALTER_DELIVERY, GET_ORDER } from "../../apollo/graphql/Store/orders";
 
 import { Header } from "../../components/Common/Header";
 import Screen from "../../components/Common/Screen";
@@ -25,11 +25,13 @@ export default function OrderDetails({
   navigation,
 }: RootStackScreenProps<"OrderDetails">) {
   const { id } = route.params;
+
   const dispatch: any = useDispatch();
 
   const { location } = useSelector((state: any) => state.locationReducer);
 
   const [permission, setPermission] = useState<string | null>(null);
+  const [dispatched, setDipatched] = useState<boolean | undefined>();
   const [order, setOrder] = useState<OrderProps | undefined>();
 
   const { loading } = useQuery(GET_ORDER, {
@@ -68,15 +70,26 @@ export default function OrderDetails({
     }
   }, [location]);
 
-  const [delivered, { loading: settingDeliveryStatus }] = useMutation(
-    DELIVERED_ORDER,
+  useEffect(() => {
+    alter({
+      variables: {
+        id: id,
+        coordinates: location,
+        dispatched: dispatched,
+      },
+    });
+  }, [dispatched]);
+
+  const [alter, { loading: settingDeliveryStatus }] = useMutation(
+    ALTER_DELIVERY,
     {
       variables: {
         id: id,
         coordinates: location,
+        dispatched: dispatched,
       },
       onCompleted(data) {
-        if (data.deliveredOrder) {
+        if (data.alterDeliveryState) {
         }
       },
       onError(error) {
@@ -148,53 +161,30 @@ export default function OrderDetails({
         )}
       />
       {!order.state.delivery.delivered && (
-        <View
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() =>
+            order.state.delivery.dispatched
+              ? setDipatched(false)
+              : setDipatched(true)
+          }
+          disabled={settingDeliveryStatus}
           style={{
-            marginTop: 5,
+            marginVertical: 10,
             height: 50,
             width: "100%",
             flexDirection: "row",
             alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: Colors.$iconPrimary,
           }}
         >
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => {}}
-            style={{
-              flex: 1,
-              height: "100%",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: Colors.$iconDanger,
-            }}
-          >
-            <BoldText style={{ color: Colors.white }}>Cancel Order</BoldText>
-          </TouchableOpacity>
-          <View style={{ width: 10 }} />
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() =>
-              delivered({
-                variables: {
-                  id: id,
-                  coordinates: location,
-                },
-              })
-            }
-            disabled={settingDeliveryStatus}
-            style={{
-              flex: 1,
-              height: "100%",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: Colors.$iconPrimary,
-            }}
-          >
-            <BoldText style={{ color: Colors.white }}>Delivered</BoldText>
-          </TouchableOpacity>
-        </View>
+          <BoldText style={{ color: Colors.white }}>
+            {order.state.delivery.dispatched
+              ? "Deliver Order"
+              : "Dispatch Order"}
+          </BoldText>
+        </TouchableOpacity>
       )}
     </Screen>
   );

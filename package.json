@@ -28,6 +28,8 @@
     "expo": "~46.0.7",
     "expo-app-loading": "~2.1.0",
     "expo-asset": "~8.6.1",
+    "expo-barcode-scanner": "~11.4.0",
+    "expo-camera": "~12.3.0",
     "expo-constants": "~13.2.3",
     "expo-font": "~10.2.0",
     "expo-linear-gradient": "~11.4.0",

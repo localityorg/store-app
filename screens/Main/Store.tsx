@@ -32,7 +32,6 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
     networkStatus,
   } = useQuery(GET_STORE, {
     onCompleted(data) {
-      console.log(data);
       if (data.getStore) {
         dispatch(setStore(data.getStore));
       }

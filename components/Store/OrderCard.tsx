@@ -33,6 +33,7 @@ export interface OrderProps {
       date: string;
     };
     delivery: {
+      dispatched: boolean;
       delivered: boolean;
       deliverBy: string;
       address: AddressProps;

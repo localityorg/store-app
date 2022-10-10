@@ -1,56 +1,87 @@
-// import { useEffect, useState } from "react";
-// import { Button, StyleSheet } from "react-native";
-// import { BarCodeScanner } from "expo-barcode-scanner";
-// import { Text, View } from "../components/Themed";
-// import { RootTabScreenProps } from "../types";
+import { useEffect, useState } from "react";
+import { StyleSheet } from "react-native";
+import { BarCodeScanner } from "expo-barcode-scanner";
+import { BoldText } from "../Common/Text";
+import { View } from "../Themed";
 
-// export default function Scanner({ navigation }: RootTabScreenProps<"Scanner">) {
-//   const [code, setCode] = useState<string | null>(null);
+import { Camera } from "expo-camera";
 
-//   useEffect(() => {
-//     if (code) {
-//       navigation.navigate("Edit");
-//     }
-//   }, [code]);
+interface ScannerProps {
+  code: string | undefined;
+  setCode: any;
+}
 
-//   const [hasPermission, setHasPermission] = useState(null);
-//   const [scanned, setScanned] = useState(false);
+const barCodeTypes = [
+  BarCodeScanner.Constants.BarCodeType.aztec,
+  BarCodeScanner.Constants.BarCodeType.codabar,
+  BarCodeScanner.Constants.BarCodeType.code39,
+  BarCodeScanner.Constants.BarCodeType.code93,
+  BarCodeScanner.Constants.BarCodeType.code128,
+  BarCodeScanner.Constants.BarCodeType.code39mod43,
+  BarCodeScanner.Constants.BarCodeType.datamatrix,
+  BarCodeScanner.Constants.BarCodeType.ean13,
+  BarCodeScanner.Constants.BarCodeType.ean8,
+  BarCodeScanner.Constants.BarCodeType.interleaved2of5,
+  BarCodeScanner.Constants.BarCodeType.itf14,
+  BarCodeScanner.Constants.BarCodeType.maxicode,
+  BarCodeScanner.Constants.BarCodeType.pdf417,
+  BarCodeScanner.Constants.BarCodeType.rss14,
+  BarCodeScanner.Constants.BarCodeType.rssexpanded,
+  BarCodeScanner.Constants.BarCodeType.upc_a,
+  BarCodeScanner.Constants.BarCodeType.upc_e,
+  BarCodeScanner.Constants.BarCodeType.upc_ean,
+];
 
-//   useEffect(() => {
-//     const getBarCodeScannerPermissions = async () => {
-//       const { status } = await BarCodeScanner.requestPermissionsAsync();
-//       setHasPermission(status === "granted");
-//     };
+export default function Scanner(props: ScannerProps) {
+  const [hasPermission, setHasPermission] = useState(null);
+  const [scanned, setScanned] = useState(false);
 
-//     getBarCodeScannerPermissions();
-//   }, []);
+  useEffect(() => {
+    if (props.code !== undefined) {
+      setScanned(false);
+    }
+  }, [props.code]);
 
-//   const handleBarCodeScanned = ({ data }: { data: string }) => {
-//     setScanned(true);
-//     setCode(data);
-//   };
+  useEffect(() => {
+    const getBarCodeScannerPermissions = async () => {
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      setHasPermission(status === "granted");
+    };
 
-//   if (hasPermission === null) {
-//     return <Text>Requesting for camera permission</Text>;
-//   }
-//   if (hasPermission === false) {
-//     return <Text>No access to camera</Text>;
-//   }
+    getBarCodeScannerPermissions();
+  }, []);
 
-//   return (
-//     <View style={styles.container}>
-//       <BarCodeScanner
-//         onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-//         style={StyleSheet.absoluteFillObject}
-//       />
-//     </View>
-//   );
-// }
+  const handleBarCodeScanned = ({ data }: { data: string }) => {
+    props.setCode(data);
+  };
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     alignItems: "center",
-//     justifyContent: "center",
-//   },
-// });
+  if (hasPermission === null) {
+    return (
+      <View flex center>
+        <BoldText>Requesting for camera permission</BoldText>
+      </View>
+    );
+  }
+  if (hasPermission === false) {
+    return (
+      <View flex center>
+        <BoldText>No access to camera</BoldText>
+      </View>
+    );
+  }
+
+  return (
+    <Camera
+      onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+      type={0}
+      focusable
+      barCodeScannerSettings={{
+        barCodeTypes: barCodeTypes,
+      }}
+      style={{
+        height: 1000,
+        width: 620,
+      }}
+    />
+  );
+}
