@@ -10,7 +10,7 @@ interface ImageProps {
 const Image = (props: ImageProps): JSX.Element => {
   return (
     <ImageLoader
-      source={(props.og ? `${IMG_URL}/` : "") + `${props.url}`}
+      source={(props.og ? `${IMG_URL}` : "") + `${props.url}.jpg`}
       fallback={[`${ICON_URL}/imagedefault.png`]}
       style={{
         height: props.dimension || 80,

@@ -17,6 +17,20 @@ import Tracker from "./Tracker";
 export interface ProductProps {
   id: string;
   name: string;
+  quantity: {
+    units: number;
+    count: string;
+    type: string;
+  };
+  price: {
+    mrp: string;
+  };
+  url: string;
+}
+
+export interface OrderProductProps {
+  id: string;
+  name: string;
   quantity: string;
   url: string;
   totalAmount: string;
@@ -43,7 +57,7 @@ export interface OrderProps {
       paid: boolean;
     };
   };
-  products: Array<ProductProps>;
+  products: Array<OrderProductProps>;
   loading: boolean;
   onPress?: any;
   screen?: boolean;
@@ -65,7 +79,7 @@ interface GrandTotalDeliveryProps {
 
 interface ProductListProps {
   card: boolean;
-  products: Array<ProductProps>;
+  products: Array<OrderProductProps>;
 }
 
 const ProductList = (props: ProductListProps): JSX.Element => {
@@ -420,6 +434,7 @@ const OrderCard = (props: OrderProps): JSX.Element => {
         flexDirection: "column",
         borderColor: Colors.$textDisabled,
       }}
+      disabled={!props.state.order.accepted}
       activeOpacity={0.6}
       onPress={props.onPress}
     >

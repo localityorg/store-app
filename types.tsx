@@ -24,6 +24,8 @@ export type RootStackParamList = {
   OrderDetails: {
     id?: string;
   };
+  Confirm: undefined;
+  EditInventory: undefined;
   Accounts: undefined;
   StoreEdit: undefined;
   NotFound: undefined;
@@ -52,3 +54,16 @@ export type RootTabScreenProps<Screen extends keyof RootTabParamList> =
     NativeStackScreenProps<RootStackParamList>,
     BottomTabScreenProps<RootTabParamList, Screen>
   >;
+
+export type AppearanceMode = "light" | "dark";
+export type CurrentAppearance = {
+  value: AppearanceMode;
+  system: boolean;
+};
+export type ThemeColors = {
+  textColor: string;
+  bgColor: string;
+  bg2Color: string;
+};
+export type StatusBarStyle = "light-content" | "dark-content" | undefined;
+export type DesignSystemColors = Record<string, string>;

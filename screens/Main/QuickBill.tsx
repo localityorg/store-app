@@ -1,5 +1,5 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { FlatList, Keyboard } from "react-native";
 import {
@@ -12,20 +12,22 @@ import {
 } from "react-native-ui-lib";
 import { useDispatch, useSelector } from "react-redux";
 
+import Image from "../../components/Common/Image";
+import { InputText, TextInput } from "../../components/Common/Input";
+import Screen from "../../components/Common/Screen";
+import { BoldText, Text } from "../../components/Common/Text";
+import Counter from "../../components/Store/Counter";
+import Scanner from "../../components/Store/Scanner";
+import { View } from "../../components/Themed";
+
+import { addCartItem, removeCartItem } from "../../redux/Store/actions";
+
+import Sizes from "../../constants/Sizes";
 import {
   EDIT_PRODUCT,
   GET_PRODUCT,
   SEARCH_PRODUCTS,
 } from "../../apollo/graphql/Store/products";
-import { InputText, TextInput } from "../../components/Common/Input";
-import Screen from "../../components/Common/Screen";
-import { BoldText, Text } from "../../components/Common/Text";
-import Scanner from "../../components/Store/Scanner";
-import TabHeader from "../../components/Store/TabHeader";
-import { View } from "../../components/Themed";
-import Sizes from "../../constants/Sizes";
-import { addCartItem } from "../../redux/Store/actions";
-
 import { RootTabScreenProps } from "../../types";
 
 export default function QuickBill({
@@ -37,6 +39,7 @@ export default function QuickBill({
 
   const [dialogVisible, setDialogVisible] = useState<boolean>(false);
   const [editProduct, setEditProduct] = useState<any>({ id: null, name: "" });
+  const [editDialog, setEditDialog] = useState<boolean>(true);
 
   const [search, setSearch] = useState<string>("");
   const [products, setProducts] = useState<any>({
@@ -57,12 +60,13 @@ export default function QuickBill({
     onCompleted(data) {
       if (data.getProduct) {
         dispatch(addCartItem(data.getProduct));
-      } else {
-        setAssignerScreen(true);
       }
     },
     onError(error) {
-      console.log({ ...error });
+      if (error.graphQLErrors[0]) {
+        console.log(error.graphQLErrors[0].message);
+        setAssignerScreen(true);
+      }
     },
   });
 
@@ -82,20 +86,26 @@ export default function QuickBill({
 
   const [edit, { loading: editing }] = useMutation(EDIT_PRODUCT, {
     variables: {
-      id: editProduct.id,
-      barcode: code,
-      url: "",
+      product: {
+        ...editProduct,
+      },
     },
+    fetchPolicy: "no-cache",
     onCompleted(data) {
       if (data.editProduct) {
         var product = data.editProduct;
         dispatch(addCartItem(product));
+        setEditDialog(true);
       }
+    },
+    onError(error) {
+      console.log({ ...error.graphQLErrors });
     },
   });
 
   useEffect(() => {
     if (code) {
+      setEditProduct({ ...editProduct, barcode: code });
       searchProduct({
         variables: {
           storeId: store?.id,
@@ -129,47 +139,123 @@ export default function QuickBill({
           }}
           ignoreBackgroundPress={false}
         >
-          <View spread>
-            <View marginT-20 marginH-20>
-              <Text $textDefault text60>
-                Confirm
-              </Text>
-              <View
-                center
-                marginT-10
-                style={{
-                  height: 1,
-                  width: "100%",
-                  backgroundColor: Colors.$backgroundDarkElevated,
-                }}
-              />
-              <Text text70 $textDefault marginT-10>
-                Assign barcode {code} to {editProduct.name}?
-              </Text>
-              <View margin-15 marginH-0 right w-100 spread row>
-                <Button
-                  label={editing ? "Editing" : "Confirm"}
-                  size={Button.sizes.small}
-                  backgroundColor={Colors.$backgroundDarkElevated}
-                  disabledBackgroundColor={Colors.$iconDisabled}
-                  disabled={editing}
-                  round={false}
-                  padding-5
-                  text70
-                  borderRadius={5}
-                  onPress={() =>
-                    edit({
-                      variables: {
-                        id: editProduct.id,
-                        barcode: code,
-                        url: "",
-                      },
+          {editDialog ? (
+            <View spread>
+              <View marginT-20 marginH-20>
+                <Text $textDefault text60>
+                  Edit Product
+                </Text>
+                <View
+                  center
+                  marginT-10
+                  style={{
+                    height: 1,
+                    width: "100%",
+                    backgroundColor: Colors.$backgroundDarkElevated,
+                  }}
+                />
+                {/* Edit Name */}
+                <InputText
+                  value={editProduct.name}
+                  onChange={(text: string) =>
+                    setEditProduct({ ...editProduct, name: text })
+                  }
+                  placeholder="Type product's name.."
+                  title="Product Name"
+                />
+                {/* Edit Quanitity Count */}
+                <View row centerH>
+                  <TextInput
+                    value={editProduct.quantity.count}
+                    onChangeText={(text: string) =>
+                      setEditProduct({
+                        ...editProduct,
+                        quantity: { ...editProduct.quantity, count: text },
+                      })
+                    }
+                    keyboardType="numeric"
+                  />
+                  <Text>{editProduct.quantity.type}</Text>
+                </View>
+                {/* Edit Price type */}
+                <TextInput
+                  value={editProduct.price.mrp}
+                  onChangeText={(text: string) =>
+                    setEditProduct({
+                      ...editProduct,
+                      price: { ...editProduct.price, mrp: text },
                     })
                   }
+                  placeholder="Price of the product"
+                  keyboardType="numeric"
                 />
+                <View margin-15 marginH-0 right w-100 spread row>
+                  <Button
+                    label={"Confirm changes"}
+                    size={Button.sizes.small}
+                    backgroundColor={Colors.$backgroundDarkElevated}
+                    disabledBackgroundColor={Colors.$iconDisabled}
+                    disabled={editing}
+                    round={false}
+                    padding-5
+                    text70
+                    borderRadius={5}
+                    onPress={() => setEditDialog(false)}
+                  />
+                  <Button
+                    label={"Edit Product"}
+                    backgroundColor={Colors.$backgroundPrimaryLight}
+                    padding-5
+                    borderRadius={5}
+                    text70
+                    onPress={() => setEditDialog(true)}
+                  />
+                </View>
               </View>
             </View>
-          </View>
+          ) : (
+            <View spread>
+              <View marginT-20 marginH-20>
+                <Text $textDefault text60>
+                  Confirm
+                </Text>
+                <View
+                  center
+                  marginT-10
+                  style={{
+                    height: 1,
+                    width: "100%",
+                    backgroundColor: Colors.$backgroundDarkElevated,
+                  }}
+                />
+                <Text text70 $textDefault marginT-10>
+                  Submit changes made to product {editProduct.name}?
+                </Text>
+                <View margin-15 marginH-0 right w-100 spread row>
+                  <Button
+                    label={editing ? "Editing" : "Confirm"}
+                    size={Button.sizes.small}
+                    backgroundColor={Colors.$backgroundDarkElevated}
+                    disabledBackgroundColor={Colors.$iconDisabled}
+                    disabled={editing}
+                    round={false}
+                    padding-5
+                    text70
+                    borderRadius={5}
+                    onPress={() =>
+                      edit({
+                        variables: {
+                          product: {
+                            ...editProduct,
+                          },
+                        },
+                      })
+                    }
+                  />
+                </View>
+              </View>
+            </View>
+          )}
         </Dialog>
         <Screen>
           <View flex marginT-25>
@@ -383,6 +469,92 @@ export default function QuickBill({
         marginB-10
       >
         <Scanner code={code} setCode={setCode} />
+      </View>
+      <View flex>
+        {cart?.length > 0 ? (
+          <FlatList
+            data={cart}
+            ItemSeparatorComponent={() => (
+              <View
+                style={{
+                  marginBottom: 10,
+                  height: 1,
+                  width: "90%",
+                  alignSelf: "center",
+                  backgroundColor: Colors.$backgroundDisabled,
+                }}
+              />
+            )}
+            keyExtractor={(e: any) => e.id.toString()}
+            renderItem={({ item }) => (
+              <View
+                style={{
+                  width: "100%",
+                  marginBottom: 5,
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Image og={true} url={item.url} dimension={80} />
+                  <View
+                    style={{
+                      width: "60%",
+                      flexDirection: "column",
+                      marginLeft: 10,
+                    }}
+                  >
+                    <Text
+                      style={{ fontSize: Sizes.font.text }}
+                      numberOfLines={2}
+                    >
+                      {item.name}
+                    </Text>
+                    <Text>
+                      {item.itemQuantity} x {item.quantity.count}
+                      {item.quantity.type}
+                    </Text>
+                  </View>
+                </View>
+                <Counter
+                  item={item}
+                  data={cart}
+                  onAdd={() => dispatch(addCartItem(item))}
+                  onRemove={() => dispatch(removeCartItem(item))}
+                />
+              </View>
+            )}
+          />
+        ) : (
+          <View flex center>
+            <View width-50 centerH>
+              <BoldText center style={{ fontSize: Sizes.font.text }}>
+                Your cart is empty!
+              </BoldText>
+            </View>
+          </View>
+        )}
+
+        {cart?.length > 0 && (
+          <Button
+            label={"Confirm"}
+            disabled={false}
+            size={Button.sizes.large}
+            backgroundColor={Colors.primary}
+            disabledBackgroundColor={Colors.$iconDisabled}
+            round={false}
+            borderRadius={10}
+            marginT-10
+            marginB-10
+            onPress={() => navigation.navigate("Confirm")}
+          />
+        )}
       </View>
     </Screen>
   );

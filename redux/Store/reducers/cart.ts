@@ -2,7 +2,18 @@ import { ADD_CART_ITEM, REMOVE_CART_ITEM, EMPTY_CART } from "../actions";
 
 var cartState = {
   tempCart: <any[]>[],
-  cart: <any[]>[],
+  cart: <any[]>[
+    {
+      brand: undefined,
+      id: "63417cc5913725fbe999308a",
+      itemQuantity: "1",
+      name: "Britannia Good Day Cashew Cookies",
+      price: { discount: "40.00", mrp: "50.00" },
+      quantity: { count: "200", type: "gm" },
+      totalPrice: "50",
+      url: "ed730342-647f-4a10-ac3f-dcc617e40f81",
+    },
+  ],
   empty: <boolean>true,
 };
 

@@ -17,7 +17,7 @@ const PRODUCT_FRAGMENT = gql`
 `;
 
 export const SEARCH_PRODUCTS = gql`
-  query SearchProducts($name: String, $limit: Int) {
+  query SearchProducts($name: String!, $limit: Int!) {
     getProducts(name: $name, limit: $limit) {
       id
       name
@@ -43,18 +43,9 @@ export const GET_PRODUCT = gql`
   }
 `;
 
-export const getProducts = gql`
-  ${PRODUCT_FRAGMENT}
-  query getProducts($name: String) {
-    getProducts(name: $name) {
-      ...ProductDetail
-    }
-  }
-`;
-
 export const EDIT_PRODUCT = gql`
-  mutation EditProduct($id: String!, $barcode: String!, $url: String) {
-    editProduct(id: $id, barcode: $barcode, url: $url) {
+  mutation EditProduct($id: String!, $barcode: String!) {
+    editProduct(id: $id, barcode: $barcode) {
       id
       name
       url

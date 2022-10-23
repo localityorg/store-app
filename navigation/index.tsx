@@ -3,7 +3,7 @@
  * https://reactnavigation.org/docs/getting-started
  *
  */
-import { AntDesign, FontAwesome } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   NavigationContainer,
@@ -12,7 +12,7 @@ import {
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
-import { ColorSchemeName, Pressable } from "react-native";
+import { ColorSchemeName } from "react-native";
 import { Colors } from "react-native-ui-lib";
 import { useSelector } from "react-redux";
 import Sizes from "../constants/Sizes";
@@ -21,6 +21,8 @@ import Login from "../screens/Auth/Login";
 import Onboarding from "../screens/Auth/Onboarding";
 import Register from "../screens/Auth/Register";
 import Accounts from "../screens/Main/Accounts";
+import Confirm from "../screens/Main/Confirm";
+import EditInventory from "../screens/Main/EditInventory";
 import OrderDetails from "../screens/Main/OrderDetails";
 
 import Orders from "../screens/Main/Orders";
@@ -83,11 +85,13 @@ function RootNavigator() {
           name="OrderDetails"
           component={OrderDetails}
           initialParams={{
-            id: "" || null,
+            id: "" || undefined,
           }}
         />
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="Accounts" component={Accounts} />
+        <Stack.Screen name="Confirm" component={Confirm} />
+        <Stack.Screen name="EditInventory" component={EditInventory} />
         <Stack.Screen name="StoreEdit" component={StoreEdit} />
       </Stack.Group>
     </Stack.Navigator>
