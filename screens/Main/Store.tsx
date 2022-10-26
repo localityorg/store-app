@@ -3,39 +3,36 @@ import { FlatList, RefreshControl } from "react-native";
 import { Colors, TouchableOpacity } from "react-native-ui-lib";
 import { NetworkStatus, useQuery } from "@apollo/client";
 import { useDispatch, useSelector } from "react-redux";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import Screen from "../../components/Common/Screen";
 import { Section } from "../../components/Common/Section";
 import { BoldText } from "../../components/Common/Text";
 import { View } from "../../components/Themed";
-
-import OrderCard, { OrderProps } from "../../components/Store/OrderCard";
-import Stats from "../../components/Store/Stats";
+import OrderCard, {
+  OrderProps,
+  ProductProps,
+} from "../../components/Store/OrderCard";
+import { SearchButton } from "../../components/Common/SearchList";
+import { InventoryProduct } from "./EditInventory";
 import TabHeader from "../../components/Store/TabHeader";
 
-import { GET_STORE, STORE_UPDATE } from "../../apollo/graphql/Store/store";
 import { setInventory, setStore } from "../../redux/Store/actions";
 
-import { RootTabScreenProps } from "../../types";
-import {
-  AntDesign,
-  Ionicons,
-  MaterialCommunityIcons,
-} from "@expo/vector-icons";
-import Sizes from "../../constants/Sizes";
-import { SearchBar } from "react-native-screens";
-import { TextInput } from "../../components/Common/Input";
-import { SearchButton } from "../../components/Common/SearchList";
+import { GET_STORE, STORE_UPDATE } from "../../apollo/graphql/Store/store";
 import {
   FETCH_INVENTORY,
   INVENTORY_UPDATE,
 } from "../../apollo/graphql/Store/inventory";
 
-export default function Store({ navigation }: RootTabScreenProps<"Store">) {
-  const [search, setSearch] = useState<string>("");
+import { RootTabScreenProps } from "../../types";
+import Sizes from "../../constants/Sizes";
 
+export default function Store({ navigation }: RootTabScreenProps<"Store">) {
   const { store } = useSelector((state: any) => state.storeReducer);
-  const { inventory } = useSelector((state: any) => state.inventoryReducer);
+  const { id: inventoryId, inventory } = useSelector(
+    (state: any) => state.inventoryReducer
+  );
   const { orders } = useSelector((state: any) => state.ordersReducer);
   const { user } = useSelector((state: any) => state.userReducer);
 
@@ -63,7 +60,7 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
   } = useQuery(FETCH_INVENTORY, {
     onCompleted(data) {
       if (data.getInventory) {
-        dispatch(setInventory(data.getInventory.products));
+        dispatch(setInventory(data.getInventory));
       }
     },
     onError(error) {
@@ -88,20 +85,22 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = subscribeToInventory({
-      document: INVENTORY_UPDATE,
-      variables: { id: inventory?.id },
-      updateQuery: (prev, { subscriptionData }) => {
-        if (!subscriptionData.data) return prev;
-        const updatedQueryData = subscriptionData.data.inventoryUpdate;
-        dispatch(setStore(updatedQueryData));
-        return Object.assign({}, prev, {
-          getInventory: updatedQueryData,
-        });
-      },
-    });
-    return unsubscribe;
-  }, []);
+    if (inventoryId) {
+      const unsubscribe = subscribeToInventory({
+        document: INVENTORY_UPDATE,
+        variables: { id: inventoryId },
+        updateQuery: (prev, { subscriptionData }) => {
+          if (!subscriptionData.data) return prev;
+          const updatedQueryData = subscriptionData.data.inventoryUpdate;
+          dispatch(setInventory(updatedQueryData));
+          return Object.assign({}, prev, {
+            getInventory: updatedQueryData,
+          });
+        },
+      });
+      return unsubscribe;
+    }
+  }, [inventoryId]);
 
   if (fetchingStore || fetchingInventory) {
     return (
@@ -129,8 +128,10 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
           borderRadius: 10,
           backgroundColor: Colors.$iconPrimary,
           margin: 30,
+          zIndex: 999,
         }}
         center
+        onPress={() => navigation.navigate("EditInventory")}
       >
         <MaterialCommunityIcons
           name="pencil"
@@ -151,11 +152,13 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
         refreshControl={
           <RefreshControl
             refreshing={fetchingStore}
-            onRefresh={() => refetchStore()}
-            tintColor={Colors.$iconPrimary}
+            onRefresh={() => {
+              refetchStore();
+              refetchInventory();
+            }}
+            colors={[Colors.$iconPrimary]}
           />
         }
-        contentContainerStyle={{ paddingBottom: 200 }}
         showsVerticalScrollIndicator={false}
         keyExtractor={(item: number) => item.toString()}
         renderItem={() => (
@@ -180,7 +183,6 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
                     (order: any) => order.state.order.accepted === false
                   )}
                   extraData={orders}
-                  ListFooterComponentStyle={{ marginBottom: 200 }}
                   keyExtractor={(item: OrderProps) => item.id.toString()}
                   renderItem={({ item }) => (
                     <OrderCard
@@ -206,20 +208,28 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
               }
               body={
                 <View flex>
-                  <SearchButton
-                    onPress={() => navigation.navigate("EditInventory")}
-                    placeholder="Search Products..."
-                  />
+                  {inventory.length > 0 && (
+                    <>
+                      <SearchButton
+                        onPress={() => navigation.navigate("EditInventory")}
+                        placeholder="Search Products..."
+                      />
+                      <FlatList
+                        listKey="0104030235"
+                        data={inventory}
+                        keyExtractor={(item: ProductProps) => item.id}
+                        renderItem={({ item }) => (
+                          <InventoryProduct
+                            data={inventory}
+                            item={item}
+                            showEdit={false}
+                            editCount={false}
+                          />
+                        )}
+                      />
+                    </>
+                  )}
                 </View>
-                // <FlatList
-                //   data={inventory}
-                //   extraData={orders}
-                //   ListFooterComponentStyle={{ marginBottom: 200 }}
-                //   keyExtractor={(item: OrderProps) => item.id.toString()}
-                //   renderItem={({ item }) => (
-                //     <View></View>
-                //   )}
-                // />
               }
             />
           </>

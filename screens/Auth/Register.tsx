@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Keyboard } from "react-native";
+import { Alert, Keyboard } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { Button, Colors, TouchableOpacity, View } from "react-native-ui-lib";
@@ -14,12 +14,13 @@ import { Map } from "../../components/Common/Map";
 import { Text } from "../../components/Common/Text";
 import { OTPInput } from "../../components/Auth/OTPInput";
 
-import { setLocation, setUser } from "../../redux/Common/actions";
+import { removeUser, setLocation, setUser } from "../../redux/Common/actions";
 
 import Sizes from "../../constants/Sizes";
 import { TWOFACTOR_AUTH } from "../../apollo/graphql/Common/auth";
 import { EDIT_STORE } from "../../apollo/graphql/Store/store";
 import { AuthStackScreenProps } from "../../types";
+import { removeStore } from "../../redux/Store/actions";
 
 export default function Register({
   navigation,
@@ -124,11 +125,17 @@ export default function Register({
     },
     onCompleted(data) {
       if (data.editStore) {
+        dispatch(removeUser());
+        dispatch(removeStore());
         dispatch(setUser(data.editStore));
       }
     },
     onError(error) {
       console.log({ ...error });
+      Alert.alert(
+        "Error occured!",
+        "We faced some issue while registering your store. Try again in some time."
+      );
     },
   });
 
@@ -235,42 +242,6 @@ export default function Register({
                     />
                   </TouchableOpacity>
                 )}
-                {/* <Incubator.TextField
-                  placeholder="Enter Adddress"
-                  floatingPlaceholder
-                  containerStyle={{
-                    flex: 1,
-                  }}
-                  onChangeText={(text: string) =>
-                    setStoreData({
-                      ...storeData,
-                      storeInfo: {
-                        ...storeData.storeInfo,
-                        address: {
-                          ...storeData.storeInfo.address,
-                          line1: text,
-                        },
-                      },
-                    })
-                  }
-                  enableErrors
-                  floatingPlaceholderColor={{
-                    focus: Colors.$textPrimary,
-                    default: Colors.$textDefault,
-                  }}
-                  floatOnFocus={true}
-                  validate={["required", (value: string) => value.length > 3]}
-                  validationMessage={[
-                    "Field is required",
-                    "Address is too short",
-                  ]}
-                  autoFocus
-                  fieldStyle={{
-                    borderBottomWidth: 1,
-                    borderColor: Colors.$outlineDisabledHeavy,
-                    paddingBottom: 4,
-                  }}
-                /> */}
               </View>
               {!isKeyboardVisible && <Map />}
               {storeLocation && !isKeyboardVisible && (
@@ -289,7 +260,12 @@ export default function Register({
                         edit: storeData.edit,
                         storeInfo: {
                           name: storeData.storeInfo.name,
-                          address: storeData.storeInfo.address,
+                          address: {
+                            ...storeData.storeInfo.address,
+                            location: {
+                              coordinates: storeLocation,
+                            },
+                          },
                           contact,
                         },
                       },
@@ -303,25 +279,6 @@ export default function Register({
           <>
             <View flex>
               <Text text70>Enter your store details below.</Text>
-              {/* <InputText
-            value={storeInfo.licenseNumber}
-            onChange={(text: string) =>
-              setStoreInfo({ ...storeInfo, licenseNumber: text })
-            }
-            placeholder="Raj Maharaj"
-            title="Your Name"
-            autoFocus={true}
-          />
-  
-          <View
-            style={{
-              marginVertical: 10,
-              height: 1,
-              width: "80%",
-              alignSelf: "center",
-              backgroundColor: Colors.$backgroundPrimaryHeavy,
-            }}
-          /> */}
 
               <TextInput
                 value={storeData.storeInfo.name}

@@ -104,14 +104,14 @@ export default function Profile({
         title="App Settings"
         body={
           <View style={{ flexDirection: "column" }}>
-            <Button
+            {/* <Button
               label={colorScheme == "light" ? "Dark Theme" : "Light Theme"}
               icon
               name="bulb1"
               fullWidth
               transparent
               onPress={() => {}}
-            />
+            /> */}
             <Button
               label="Logout"
               icon

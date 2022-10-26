@@ -71,6 +71,8 @@ export const EDIT_STORE = gql`
           coordinates
         }
       }
+      token
+      refreshToken
     }
   }
 `;

@@ -26,6 +26,7 @@ export interface ProductProps {
     mrp: string;
   };
   url: string;
+  itemQuantity?: number;
 }
 
 export interface OrderProductProps {
@@ -53,7 +54,7 @@ export interface OrderProps {
       address: AddressProps;
     };
     payment: {
-      grandTotal: string;
+      grandAmount: string;
       paid: boolean;
     };
   };
@@ -142,7 +143,7 @@ const ProductList = (props: ProductListProps): JSX.Element => {
                 fontSize: props.card ? Sizes.font.text : 16,
               }}
             >
-              Rs. {item.totalAmount}/-
+              ₹ {item.totalAmount}/-
             </Text>
           </View>
         </View>
@@ -174,7 +175,7 @@ const GrandTotalDeliveryCard = (
         <View style={{ flexDirection: "column", alignItems: "flex-start" }}>
           <BoldText>Address</BoldText>
           <Text numberOfLines={1} text70 style={{ width: "100%" }}>
-            {props.address.line}
+            {props.address?.line || "In Store"}
           </Text>
         </View>
         <View
@@ -195,7 +196,7 @@ const GrandTotalDeliveryCard = (
         }}
       >
         <BoldText>Grand Total</BoldText>
-        <Text text70>Rs. {props.grandTotal}/-</Text>
+        <Text text70>₹ {props.grandTotal}/-</Text>
       </View>
     </View>
   );
@@ -325,7 +326,7 @@ const OrderCard = (props: OrderProps): JSX.Element => {
                       fontSize: 16,
                     }}
                   >
-                    Rs. {props.state.payment.grandTotal}/-
+                    Rs. {props.state.payment.grandAmount}/-
                   </Text>
                 </View>
               </View>
@@ -471,7 +472,7 @@ const OrderCard = (props: OrderProps): JSX.Element => {
       </View>
       <GrandTotalDeliveryCard
         address={props.state.delivery.address}
-        grandTotal={props.state.payment.grandTotal}
+        grandTotal={props.state.payment.grandAmount}
       />
       {!props.state.order.accepted && (
         <View

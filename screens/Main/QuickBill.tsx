@@ -20,7 +20,11 @@ import Counter from "../../components/Store/Counter";
 import Scanner from "../../components/Store/Scanner";
 import { View } from "../../components/Themed";
 
-import { addCartItem, removeCartItem } from "../../redux/Store/actions";
+import {
+  addCartItem,
+  emptyCart,
+  removeCartItem,
+} from "../../redux/Store/actions";
 
 import Sizes from "../../constants/Sizes";
 import {
@@ -30,6 +34,14 @@ import {
 } from "../../apollo/graphql/Store/products";
 import { RootTabScreenProps } from "../../types";
 
+const base = {
+  id: null,
+  name: "",
+  price: { mrp: "" },
+  quantity: { count: "", type: "" },
+  barcode: "",
+};
+
 export default function QuickBill({
   navigation,
 }: RootTabScreenProps<"QuickBill">) {
@@ -38,7 +50,18 @@ export default function QuickBill({
   const [assignerScreen, setAssignerScreen] = useState<boolean>(false);
 
   const [dialogVisible, setDialogVisible] = useState<boolean>(false);
-  const [editProduct, setEditProduct] = useState<any>({ id: null, name: "" });
+  const [editProduct, setEditProduct] = useState<{
+    id: string | null;
+    name: string;
+    price: {
+      mrp: string;
+    };
+    quantity: {
+      count: string;
+      type: string;
+    };
+    barcode: string;
+  }>(base);
   const [editDialog, setEditDialog] = useState<boolean>(true);
 
   const [search, setSearch] = useState<string>("");
@@ -125,12 +148,7 @@ export default function QuickBill({
         <Dialog
           bottom={true}
           visible={dialogVisible}
-          onDismiss={() =>
-            setEditProduct({
-              id: null,
-              name: "",
-            })
-          }
+          onDismiss={() => setEditProduct(base)}
           panDirection={PanningProvider.Directions.DOWN}
           containerStyle={{
             backgroundColor: Colors.$backgroundDefault,
@@ -141,77 +159,96 @@ export default function QuickBill({
         >
           {editDialog ? (
             <View spread>
-              <View marginT-20 marginH-20>
-                <Text $textDefault text60>
-                  Edit Product
-                </Text>
-                <View
-                  center
-                  marginT-10
-                  style={{
-                    height: 1,
-                    width: "100%",
-                    backgroundColor: Colors.$backgroundDarkElevated,
-                  }}
-                />
-                {/* Edit Name */}
-                <InputText
-                  value={editProduct.name}
-                  onChange={(text: string) =>
-                    setEditProduct({ ...editProduct, name: text })
-                  }
-                  placeholder="Type product's name.."
-                  title="Product Name"
-                />
-                {/* Edit Quanitity Count */}
-                <View row centerH>
-                  <TextInput
-                    value={editProduct.quantity.count}
-                    onChangeText={(text: string) =>
+              {editProduct && (
+                <View marginT-20 marginH-20>
+                  <Text $textDefault text60>
+                    Edit Product
+                  </Text>
+                  <View
+                    center
+                    marginT-10
+                    style={{
+                      height: 1,
+                      width: "100%",
+                      backgroundColor: Colors.$backgroundDarkElevated,
+                    }}
+                  />
+                  {/* Edit Name */}
+                  <InputText
+                    value={editProduct.name}
+                    onChange={(text: string) =>
+                      setEditProduct({ ...editProduct, name: text })
+                    }
+                    placeholder="Type product's name.."
+                    title="Product Name"
+                  />
+                  {/* Edit Quanitity Count */}
+                  <View row centerH marginL-10>
+                    <InputText
+                      title={`Quantity (${editProduct.quantity.type})`}
+                      placeholder="Eg. 200"
+                      value={editProduct.quantity.count}
+                      onChange={(text: string) =>
+                        setEditProduct({
+                          ...editProduct,
+                          quantity: { ...editProduct.quantity, count: text },
+                        })
+                      }
+                      keyboardType="numeric"
+                      mini={true}
+                    />
+                    {/* Edit Price type */}
+                    <InputText
+                      title="Price"
+                      placeholder="Eg. 50.00"
+                      value={editProduct.price.mrp}
+                      onChange={(text: string) =>
+                        setEditProduct({
+                          ...editProduct,
+                          price: { ...editProduct.price, mrp: text },
+                        })
+                      }
+                      mini={true}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                  <InputText
+                    title="Barcode"
+                    placeholder="9984045240534"
+                    value={editProduct.barcode}
+                    onChange={(text: string) =>
                       setEditProduct({
                         ...editProduct,
-                        quantity: { ...editProduct.quantity, count: text },
+                        barcode: text,
                       })
                     }
+                    mini={false}
                     keyboardType="numeric"
                   />
-                  <Text>{editProduct.quantity.type}</Text>
+                  <View margin-15 marginH-0 right w-100 spread row>
+                    <Button
+                      label={"Confirm changes"}
+                      size={Button.sizes.small}
+                      backgroundColor={Colors.$backgroundDarkElevated}
+                      disabledBackgroundColor={Colors.$iconDisabled}
+                      disabled={editing}
+                      round={false}
+                      padding-5
+                      text70
+                      borderRadius={5}
+                      onPress={() => setEditDialog(false)}
+                    />
+                    <Button
+                      label={"Edit Product"}
+                      backgroundColor={Colors.$iconPrimary}
+                      padding-5
+                      borderRadius={5}
+                      text70
+                      onPress={() => setEditDialog(true)}
+                    />
+                  </View>
                 </View>
-                {/* Edit Price type */}
-                <TextInput
-                  value={editProduct.price.mrp}
-                  onChangeText={(text: string) =>
-                    setEditProduct({
-                      ...editProduct,
-                      price: { ...editProduct.price, mrp: text },
-                    })
-                  }
-                  placeholder="Price of the product"
-                  keyboardType="numeric"
-                />
-                <View margin-15 marginH-0 right w-100 spread row>
-                  <Button
-                    label={"Confirm changes"}
-                    size={Button.sizes.small}
-                    backgroundColor={Colors.$backgroundDarkElevated}
-                    disabledBackgroundColor={Colors.$iconDisabled}
-                    disabled={editing}
-                    round={false}
-                    padding-5
-                    text70
-                    borderRadius={5}
-                    onPress={() => setEditDialog(false)}
-                  />
-                  <Button
-                    label={"Edit Product"}
-                    backgroundColor={Colors.$backgroundPrimaryLight}
-                    padding-5
-                    borderRadius={5}
-                    text70
-                    onPress={() => setEditDialog(true)}
-                  />
-                </View>
-              </View>
+              )}
             </View>
           ) : (
             <View spread>
@@ -265,10 +302,7 @@ export default function QuickBill({
                 center
                 marginB-15
                 onPress={() => {
-                  setEditProduct({
-                    id: null,
-                    name: "",
-                  });
+                  setEditProduct(base);
                   setAssignerScreen(false);
                 }}
               >
@@ -384,10 +418,7 @@ export default function QuickBill({
                     row
                     padding-5
                     onPress={() => {
-                      setEditProduct({
-                        id: item.id,
-                        name: `${item.name} ${item.quantity.count}${item.quantity.type}`,
-                      });
+                      setEditProduct(item);
                     }}
                   >
                     <Text text70 flex numberOfLines={2}>
@@ -424,14 +455,12 @@ export default function QuickBill({
         <BoldText text40>Quickbill</BoldText>
 
         <View row centerH>
-          <TouchableOpacity padding-10>
+          <TouchableOpacity padding-10 onPress={() => dispatch(emptyCart())}>
             <AntDesign
               size={Sizes.icon.normal}
               name="delete"
               color={
-                empty
-                  ? Colors.$textDisabled
-                  : Colors.$textDanger || Colors.$textDisabled
+                cart.length > 0 ? Colors.$textDanger : Colors.$textDisabled
               }
             />
           </TouchableOpacity>

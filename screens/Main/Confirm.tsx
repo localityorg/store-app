@@ -1,18 +1,33 @@
 import { useMutation } from "@apollo/client";
 import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, FlatList } from "react-native";
 import { Button, Colors } from "react-native-ui-lib";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { CREATE_ORDER } from "../../apollo/graphql/Store/orders";
 import { Header } from "../../components/Common/Header";
+import Image from "../../components/Common/Image";
 import Screen from "../../components/Common/Screen";
+import { BoldText, Text } from "../../components/Common/Text";
+import Counter from "../../components/Store/Counter";
+import GrandTotalCard from "../../components/Store/GrandTotal";
+import { ProductProps } from "../../components/Store/OrderCard";
 import { View } from "../../components/Themed";
+import Sizes from "../../constants/Sizes";
+import {
+  addCartItem,
+  emptyCart,
+  removeCartItem,
+} from "../../redux/Store/actions";
 
-import { RootStackScreenProps } from "../../types";
+import { RootTabScreenProps } from "../../types";
 
-const Confirm = ({ navigation }: RootStackScreenProps<"Confirm">) => {
+const Confirm = ({ navigation }: RootTabScreenProps<"QuickBill">) => {
+  const dispatch: any = useDispatch();
+
   const [products, setProducts] = useState<any>([]);
+  const [method, setMethod] = useState<string>("CASH");
+  const [accountId, setAccountId] = useState<string | null>(null);
   const [grandTotal, setGrandTotal] = useState<string>("0");
-
   const [delivery, setDelivery] = useState(false);
 
   const { cart } = useSelector((state: any) => state.cartReducer);
@@ -27,12 +42,22 @@ const Confirm = ({ navigation }: RootStackScreenProps<"Confirm">) => {
         storeId: store.id,
         delivery,
         deliverBy: new Date().toISOString(),
-        accountId: null,
+        accountId: accountId,
+        method,
       },
     },
-    onCompleted(data) {},
+    onCompleted(data) {
+      if (data.createOrder) {
+        navigation.navigate("QuickBill");
+        dispatch(emptyCart());
+      }
+    },
     onError(error) {
       console.log({ ...error });
+      Alert.alert(
+        "Error occured",
+        "We could not register this order. Try again in some time."
+      );
     },
   });
 
@@ -46,7 +71,8 @@ const Confirm = ({ navigation }: RootStackScreenProps<"Confirm">) => {
           storeId: store.id,
           delivery,
           deliverBy: new Date().toISOString(),
-          accountId: null,
+          accountId,
+          method,
         },
       },
     });
@@ -72,10 +98,78 @@ const Confirm = ({ navigation }: RootStackScreenProps<"Confirm">) => {
     }
   }, [cart]);
 
+  if (loading) {
+    return (
+      <View flex center>
+        <ActivityIndicator
+          size={"large"}
+          color={Colors.$iconPrimary}
+          style={{ marginBottom: 10 }}
+        />
+        <BoldText $iconPrimary text70>
+          Getting order confirmation
+        </BoldText>
+      </View>
+    );
+  }
+
   return (
     <Screen>
       <Header title="Confirm" onBack={() => navigation.navigate("QuickBill")} />
-      <View flex></View>
+      <View flex>
+        <FlatList
+          data={cart}
+          keyExtractor={(item: ProductProps) => item.id}
+          renderItem={({ item }) => (
+            <View
+              style={{
+                width: "100%",
+                marginBottom: 5,
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <Image og={true} url={item.url} dimension={80} />
+                <View
+                  style={{
+                    width: "60%",
+                    flexDirection: "column",
+                    marginLeft: 10,
+                  }}
+                >
+                  <Text style={{ fontSize: Sizes.font.text }} numberOfLines={2}>
+                    {item.name}
+                  </Text>
+                  <Text>
+                    {item.itemQuantity} x {item.quantity.count}
+                    {item.quantity.type}
+                  </Text>
+                </View>
+              </View>
+              <Counter
+                item={item}
+                editCount={true}
+                data={cart}
+                onAdd={() => dispatch(addCartItem(item))}
+                onRemove={() => dispatch(removeCartItem(item))}
+              />
+            </View>
+          )}
+        />
+      </View>
+      <GrandTotalCard
+        total={grandTotal}
+        m={method}
+        setMethod={setMethod}
+        setAccountId={(id: string) => setAccountId}
+      />
       <Button
         label={"Confirm"}
         disabled={false}

@@ -17,12 +17,11 @@ interface CounterProps {
   onAdd: any;
   onRemove: any;
   editCount: boolean;
+  showEdit?: boolean;
 }
 
 export default function Counter(props: CounterProps) {
   const [count, setCount] = useState<number>(0);
-
-  const dispatch: any = useDispatch();
 
   useEffect(() => {
     const item = props.data.find((e: any) => e.id === props.item.id);
@@ -38,17 +37,23 @@ export default function Counter(props: CounterProps) {
           height={45}
           width={40}
           center
-          style={{ backgroundColor: Colors.$backgroundDisabled + "99" }}
+          style={{
+            borderWidth: 1,
+            borderRadius: 10,
+            borderColor: Colors.$iconPrimary + "99",
+          }}
         >
           <Text text70>{count}</Text>
         </View>
-        <TouchableOpacity padding-10 center marginL-15 onPress={props.onAdd}>
-          <MaterialCommunityIcons
-            name="pencil"
-            color={Colors.$iconPrimary}
-            size={Sizes.icon.normal}
-          />
-        </TouchableOpacity>
+        {props.showEdit && (
+          <TouchableOpacity padding-10 center marginL-15 onPress={props.onAdd}>
+            <MaterialCommunityIcons
+              name="pencil"
+              color={Colors.$iconPrimary}
+              size={Sizes.icon.normal}
+            />
+          </TouchableOpacity>
+        )}
       </View>
     );
   }

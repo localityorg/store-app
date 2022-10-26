@@ -1,4 +1,4 @@
-import { OrderProps } from "../../components/Store/OrderCard";
+import { OrderProps, ProductProps } from "../../components/Store/OrderCard";
 
 // all user
 export const ADD_CART_ITEM = "ADD_CART_ITEM";
@@ -63,12 +63,14 @@ export const setAccountsMeta = (meta: any) => (dispatch: any) => {
 // set inventory
 export const SET_INVENTORY = "SET_INVENTORY";
 
-export const setInventory = (inventory: any) => (dispatch: any) => {
-  dispatch({
-    type: SET_INVENTORY,
-    payload: inventory,
-  });
-};
+export const setInventory =
+  (inventory: { id: string; products: Array<ProductProps> }) =>
+  (dispatch: any) => {
+    dispatch({
+      type: SET_INVENTORY,
+      payload: inventory,
+    });
+  };
 
 // all user orders
 export const SET_ORDERS = "SET_ORDERS";

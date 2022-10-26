@@ -11,7 +11,7 @@ const Image = (props: ImageProps): JSX.Element => {
   return (
     <ImageLoader
       source={(props.og ? `${IMG_URL}` : "") + `${props.url}.jpg`}
-      fallback={[`${ICON_URL}/imagedefault.png`]}
+      fallback={[`${ICON_URL}imagedefault.png`]}
       style={{
         height: props.dimension || 80,
         width: props.dimension || 80,
