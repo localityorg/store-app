@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Colors, TouchableOpacity, View } from "react-native-ui-lib";
 import { AntDesign } from "@expo/vector-icons";
-import { Keyboard } from "react-native";
+import { Alert, Keyboard } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useMutation } from "@apollo/client";
 
@@ -85,7 +85,11 @@ const StoreDetails = (props: DetailProps): JSX.Element => {
       }
     },
     onError(error) {
-      console.log({ ...error });
+      Alert.alert(
+        "Request not sucessful",
+        "Maybe you forgot to change values or some values were incorrect. Try again in some time!"
+      );
+      props.onNext();
     },
   });
 

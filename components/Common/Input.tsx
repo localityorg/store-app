@@ -45,6 +45,7 @@ interface InputProps {
   onChange: any;
   error?: boolean;
   errorMessage?: string;
+  lines?: number;
   constraint?: any;
   maxLength?: number;
   autoFocus?: boolean;
@@ -95,6 +96,8 @@ export function InputText(props: InputProps) {
             marginRight: 10,
             fontSize: Sizes.font.text,
           }}
+          multiline={props.lines ? true : false}
+          numberOfLines={props.lines || 1}
           placeholderTextColor={Colors.tabIconDefault}
           onFocus={() => setFocus(true)}
           onBlur={() => setFocus(false)}

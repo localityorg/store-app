@@ -5,6 +5,7 @@ import { BoldText } from "../Common/Text";
 import { View } from "../Themed";
 
 import { Camera } from "expo-camera";
+import Sizes from "../../constants/Sizes";
 
 interface ScannerProps {
   code: string | undefined;
@@ -53,6 +54,7 @@ export default function Scanner(props: ScannerProps) {
 
   const handleBarCodeScanned = ({ data }: { data: string }) => {
     props.setCode(data);
+    // console.log(data);
   };
 
   if (hasPermission === null) {
@@ -79,8 +81,8 @@ export default function Scanner(props: ScannerProps) {
         barCodeTypes: barCodeTypes,
       }}
       style={{
-        height: 1000,
-        width: 620,
+        height: 900,
+        width: 680,
       }}
     />
   );

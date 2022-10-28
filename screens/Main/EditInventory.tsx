@@ -230,7 +230,7 @@ export default function EditInventory({
         items
       );
     } else {
-      var q = item.quantity.units + 1;
+      var q = items[i].quantity.units + 1;
       items.splice(i, 1);
       newItems = [{ ...item, quantity: { ...item.quantity, units: q } }].concat(
         items

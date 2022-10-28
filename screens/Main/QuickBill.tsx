@@ -1,7 +1,7 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { AntDesign } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
-import { FlatList, Keyboard } from "react-native";
+import { ActivityIndicator, FlatList, Keyboard } from "react-native";
 import {
   Button,
   Colors,
@@ -70,7 +70,8 @@ export default function QuickBill({
     error: true,
   });
 
-  const [code, setCode] = useState<string | undefined>();
+  const [code, setCode] = useState<string>("");
+  const [showScanner, setShowScanner] = useState<boolean>(false);
 
   const { cart, empty } = useSelector((state: any) => state.cartReducer);
   const { store } = useSelector((state: any) => state.storeReducer);
@@ -81,14 +82,17 @@ export default function QuickBill({
       barcode: code,
     },
     onCompleted(data) {
-      if (data.getProduct) {
-        dispatch(addCartItem(data.getProduct));
+      if (data.getProduct.product) {
+        dispatch(addCartItem(data.getProduct.product));
       }
     },
     onError(error) {
+      console.log(error);
       if (error.graphQLErrors[0]) {
-        console.log(error.graphQLErrors[0].message);
         setAssignerScreen(true);
+        if (dialogVisible) {
+          setDialogVisible(true);
+        }
       }
     },
   });
@@ -109,25 +113,26 @@ export default function QuickBill({
 
   const [edit, { loading: editing }] = useMutation(EDIT_PRODUCT, {
     variables: {
-      product: {
-        ...editProduct,
-      },
+      product: editProduct,
     },
     fetchPolicy: "no-cache",
     onCompleted(data) {
       if (data.editProduct) {
         var product = data.editProduct;
         dispatch(addCartItem(product));
+        setAssignerScreen(false);
+        setEditProduct(base);
         setEditDialog(true);
       }
     },
     onError(error) {
-      console.log({ ...error.graphQLErrors });
+      console.log(editProduct);
+      console.log({ ...error });
     },
   });
 
   useEffect(() => {
-    if (code) {
+    if (code?.length > 0) {
       setEditProduct({ ...editProduct, barcode: code });
       searchProduct({
         variables: {
@@ -135,11 +140,13 @@ export default function QuickBill({
           barcode: code,
         },
       });
+      setCode("");
+      // console.log(code);
     }
   }, [code]);
 
   useEffect(() => {
-    editProduct.id ? setDialogVisible(true) : setDialogVisible(false);
+    editProduct.id && setDialogVisible(true);
   }, [editProduct]);
 
   if (assignerScreen) {
@@ -148,7 +155,10 @@ export default function QuickBill({
         <Dialog
           bottom={true}
           visible={dialogVisible}
-          onDismiss={() => setEditProduct(base)}
+          onDismiss={() => {
+            setEditProduct(base);
+            setDialogVisible(false);
+          }}
           panDirection={PanningProvider.Directions.DOWN}
           containerStyle={{
             backgroundColor: Colors.$backgroundDefault,
@@ -161,6 +171,26 @@ export default function QuickBill({
             <View spread>
               {editProduct && (
                 <View marginT-20 marginH-20>
+                  {showScanner && (
+                    <View
+                      style={{
+                        width: "100%",
+                        height: 200,
+                        borderRadius: 10,
+                        overflow: "hidden",
+                        backgroundColor: Colors.$backgroundNeutralIdle,
+                      }}
+                      marginB-10
+                    >
+                      <Scanner
+                        code={editProduct.barcode}
+                        setCode={(unicode: string) => {
+                          setEditProduct({ ...editProduct, barcode: unicode });
+                          setShowScanner(false);
+                        }}
+                      />
+                    </View>
+                  )}
                   <Text $textDefault text60>
                     Edit Product
                   </Text>
@@ -179,24 +209,51 @@ export default function QuickBill({
                     onChange={(text: string) =>
                       setEditProduct({ ...editProduct, name: text })
                     }
+                    lines={2}
                     placeholder="Type product's name.."
                     title="Product Name"
                   />
                   {/* Edit Quanitity Count */}
-                  <View row centerH marginL-10>
-                    <InputText
-                      title={`Quantity (${editProduct.quantity.type})`}
-                      placeholder="Eg. 200"
-                      value={editProduct.quantity.count}
-                      onChange={(text: string) =>
-                        setEditProduct({
-                          ...editProduct,
-                          quantity: { ...editProduct.quantity, count: text },
-                        })
-                      }
-                      keyboardType="numeric"
-                      mini={true}
-                    />
+                  <View row centerH marginL-5>
+                    <View
+                      style={{
+                        marginTop: 4,
+                        width: "50%",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <View
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        <BoldText text70 marginR-10>
+                          Quantity
+                        </BoldText>
+                        <TextInput
+                          style={{ width: 100 }}
+                          placeholder="Eg. L"
+                          value={editProduct.quantity.type}
+                          onChangeText={(text: string) =>
+                            setEditProduct({
+                              ...editProduct,
+                              quantity: { ...editProduct.quantity, type: text },
+                            })
+                          }
+                        />
+                      </View>
+                      <TextInput
+                        style={{ marginTop: 5, width: 100 }}
+                        placeholder="Eg. 200"
+                        value={editProduct.quantity.count}
+                        onChangeText={(text: string) =>
+                          setEditProduct({
+                            ...editProduct,
+                            quantity: { ...editProduct.quantity, count: text },
+                          })
+                        }
+                        keyboardType="numeric"
+                      />
+                    </View>
                     {/* Edit Price type */}
                     <InputText
                       title="Price"
@@ -212,22 +269,70 @@ export default function QuickBill({
                       keyboardType="numeric"
                     />
                   </View>
-                  <InputText
-                    title="Barcode"
-                    placeholder="9984045240534"
-                    value={editProduct.barcode}
-                    onChange={(text: string) =>
-                      setEditProduct({
-                        ...editProduct,
-                        barcode: text,
-                      })
-                    }
-                    mini={false}
-                    keyboardType="numeric"
-                  />
+                  <View
+                    row
+                    style={{
+                      alignItems: "flex-start",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <View style={{ width: "70%" }}>
+                      <InputText
+                        title="Barcode"
+                        placeholder="9984045240534"
+                        value={editProduct.barcode}
+                        onChange={(text: string) =>
+                          setEditProduct({
+                            ...editProduct,
+                            barcode: text,
+                          })
+                        }
+                        mini={false}
+                        keyboardType="numeric"
+                      />
+                    </View>
+                    <TouchableOpacity
+                      center
+                      style={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: 10,
+                        borderWidth: 1,
+                        backgroundColor: showScanner
+                          ? Colors.$backgroundDarkActive
+                          : "transparent",
+                      }}
+                      onPress={() => setShowScanner(!showScanner)}
+                    >
+                      <AntDesign
+                        name="camerao"
+                        size={20}
+                        color={
+                          showScanner
+                            ? Colors.white
+                            : Colors.$backgroundDarkActive
+                        }
+                      />
+                    </TouchableOpacity>
+                  </View>
                   <View margin-15 marginH-0 right w-100 spread row>
                     <Button
-                      label={"Confirm changes"}
+                      label={"Discard Changes"}
+                      backgroundColor={Colors.$backgroundDefault}
+                      outlineColor={Colors.$iconNeutral}
+                      labelStyle={{
+                        color: Colors.$iconNeutral,
+                      }}
+                      padding-5
+                      borderRadius={5}
+                      text70
+                      onPress={() => {
+                        setEditProduct(base);
+                        setDialogVisible(false);
+                      }}
+                    />
+                    <Button
+                      label={`${editProduct.id ? "Edit" : "Add"} Product`}
                       size={Button.sizes.small}
                       backgroundColor={Colors.$backgroundDarkElevated}
                       disabledBackgroundColor={Colors.$iconDisabled}
@@ -237,14 +342,6 @@ export default function QuickBill({
                       text70
                       borderRadius={5}
                       onPress={() => setEditDialog(false)}
-                    />
-                    <Button
-                      label={"Edit Product"}
-                      backgroundColor={Colors.$iconPrimary}
-                      padding-5
-                      borderRadius={5}
-                      text70
-                      onPress={() => setEditDialog(true)}
                     />
                   </View>
                 </View>
@@ -268,9 +365,13 @@ export default function QuickBill({
                 <Text text70 $textDefault marginT-10>
                   Submit changes made to product {editProduct.name}?
                 </Text>
-                <View margin-15 marginH-0 right w-100 spread row>
+                <View margin-15 marginH-0 spread>
                   <Button
-                    label={editing ? "Editing" : "Confirm"}
+                    label={
+                      editing
+                        ? `${editProduct.id ? "Editing" : "Adding"}`
+                        : "Confirm"
+                    }
                     size={Button.sizes.small}
                     backgroundColor={Colors.$backgroundDarkElevated}
                     disabledBackgroundColor={Colors.$iconDisabled}
@@ -364,7 +465,7 @@ export default function QuickBill({
                     disabled={search.trim().length > 0 ? false : true}
                   >
                     <AntDesign
-                      name="arrowright"
+                      name="search1"
                       size={Sizes.icon.normal}
                       color={Colors.white}
                     />
@@ -433,6 +534,19 @@ export default function QuickBill({
               }}
             />
           </View>
+          {search.length <= 0 && (
+            <Button
+              label={"Add New Product"}
+              disabled={false}
+              size={Button.sizes.large}
+              backgroundColor={Colors.$backgroundDarkActive}
+              disabledBackgroundColor={Colors.$iconDisabled}
+              round={false}
+              borderRadius={10}
+              marginV-10
+              onPress={() => setDialogVisible(true)}
+            />
+          )}
         </Screen>
       </>
     );
@@ -481,7 +595,7 @@ export default function QuickBill({
           >
             <AntDesign
               size={Sizes.icon.normal}
-              name="plus"
+              name="search1"
               color={Colors.$iconPrimary}
             />
           </TouchableOpacity>
@@ -497,7 +611,16 @@ export default function QuickBill({
         }}
         marginB-10
       >
-        <Scanner code={code} setCode={setCode} />
+        {loading ? (
+          <View flex>
+            <ActivityIndicator size={"large"} />
+          </View>
+        ) : (
+          <Scanner
+            code={code}
+            setCode={(unicode: string) => setCode(unicode)}
+          />
+        )}
       </View>
       <View flex>
         {cart?.length > 0 ? (

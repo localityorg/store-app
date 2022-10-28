@@ -11,7 +11,7 @@ import ContactInput from "../../components/Auth/ContactInput";
 import { Header } from "../../components/Common/Header";
 import { TextInput } from "../../components/Common/Input";
 import { Map } from "../../components/Common/Map";
-import { Text } from "../../components/Common/Text";
+import { BoldText, Text } from "../../components/Common/Text";
 import { OTPInput } from "../../components/Auth/OTPInput";
 
 import { removeUser, setLocation, setUser } from "../../redux/Common/actions";
@@ -394,6 +394,14 @@ export default function Register({
         }
         setContact={(text: string) => setContact({ ...contact, number: text })}
       />
+      <View flex></View>
+      {error.error && (
+        <View marginV-10 center>
+          <BoldText text70 style={{ color: Colors.red30 }}>
+            {error.message}
+          </BoldText>
+        </View>
+      )}
     </Screen>
   );
 }

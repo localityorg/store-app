@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import Screen from "../../components/Common/Screen";
 import ContactInput from "../../components/Auth/ContactInput";
 import { Header } from "../../components/Common/Header";
-import { Text } from "../../components/Common/Text";
+import { BoldText, Text } from "../../components/Common/Text";
 import { OTPInput } from "../../components/Auth/OTPInput";
 
 import { setUser } from "../../redux/Common/actions";
@@ -15,6 +15,8 @@ import { setStore } from "../../redux/Store/actions";
 import { TWOFACTOR_AUTH } from "../../apollo/graphql/Common/auth";
 import { LOGIN_USER } from "../../apollo/graphql/Common/user";
 import { AuthStackScreenProps } from "../../types";
+import { View } from "../../components/Themed";
+import { Colors } from "react-native-ui-lib";
 
 export default function Login({ navigation }: AuthStackScreenProps<"Login">) {
   const [contact, setContact] = useState({
@@ -25,7 +27,6 @@ export default function Login({ navigation }: AuthStackScreenProps<"Login">) {
     tfScreen: false,
     date: "",
   });
-
   const [error, setError] = useState({
     error: false,
     message: "",
@@ -123,6 +124,14 @@ export default function Login({ navigation }: AuthStackScreenProps<"Login">) {
           setContact({ ...contact, number: text });
         }}
       />
+      <View flex></View>
+      {error.error && (
+        <View marginV-10 center>
+          <BoldText text70 style={{ color: Colors.red30 }}>
+            {error.message}
+          </BoldText>
+        </View>
+      )}
     </Screen>
   );
 }

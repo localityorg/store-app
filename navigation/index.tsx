@@ -161,6 +161,7 @@ function BottomTabNavigator() {
         name="QuickBill"
         component={QuickBill}
         options={{
+          unmountOnBlur: true,
           tabBarHideOnKeyboard: true,
           title: "Quick Bill",
           tabBarIcon: ({ color }) => <TabBarIcon name="qrcode" color={color} />,
