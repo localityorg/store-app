@@ -17,7 +17,7 @@ import { SearchButton } from "../../components/Common/SearchList";
 import { InventoryProduct } from "./EditInventory";
 import TabHeader from "../../components/Store/TabHeader";
 
-import { setInventory, setStore } from "../../redux/Store/actions";
+import { removeStore, setInventory, setStore } from "../../redux/Store/actions";
 
 import { GET_STORE, STORE_UPDATE } from "../../apollo/graphql/Store/store";
 import {
@@ -27,6 +27,7 @@ import {
 
 import { RootTabScreenProps } from "../../types";
 import Sizes from "../../constants/Sizes";
+import { removeUser } from "../../redux/Common/actions";
 
 export default function Store({ navigation }: RootTabScreenProps<"Store">) {
   const { store } = useSelector((state: any) => state.storeReducer);
@@ -49,7 +50,10 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
       }
     },
     onError(error) {
-      console.log({ ...error });
+      if (error.graphQLErrors[0]) {
+        dispatch(removeStore());
+        dispatch(removeUser());
+      }
     },
   });
 
@@ -64,7 +68,9 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
       }
     },
     onError(error) {
-      console.log({ ...error.graphQLErrors });
+      if (error.graphQLErrors[0]) {
+        console.log("Error fetching inventory");
+      }
     },
   });
 

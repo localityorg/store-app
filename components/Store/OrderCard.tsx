@@ -1,17 +1,19 @@
 import { useMutation } from "@apollo/client";
-import { formatDistanceToNow, parseISO } from "date-fns";
+import { format, formatDistanceToNow, parseISO } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
 import { Colors } from "react-native-ui-lib";
 import { useDispatch } from "react-redux";
-import { ALTER_STATE } from "../../apollo/graphql/Store/orders";
-import Sizes from "../../constants/Sizes";
-import { changeState } from "../../redux/Store/actions";
-import { AccountTile } from "../../screens/Main/Accounts";
+
 import Image from "../Common/Image";
 import { Section } from "../Common/Section";
 import { BoldText, Text } from "../Common/Text";
 import { View } from "../Themed";
+
+import { changeState } from "../../redux/Store/actions";
+
+import { ALTER_STATE } from "../../apollo/graphql/Store/orders";
+import Sizes from "../../constants/Sizes";
 import Tracker from "./Tracker";
 
 export interface ProductProps {
@@ -56,6 +58,9 @@ export interface OrderProps {
     payment: {
       grandAmount: string;
       paid: boolean;
+    };
+    created: {
+      date: string;
     };
   };
   products: Array<OrderProductProps>;
@@ -274,7 +279,11 @@ const OrderCard = (props: OrderProps): JSX.Element => {
                 fontSize: 16,
               }}
             >
-              {props.state.delivery.address.line}
+              {props.state.delivery.address.line ||
+                `Registered in store on ${format(
+                  parseISO(props.state.created.date),
+                  "dd-MM hh:mm aa"
+                )}`}
             </Text>
           }
         />
@@ -365,7 +374,7 @@ const OrderCard = (props: OrderProps): JSX.Element => {
                       fontSize: 16,
                     }}
                   >
-                    unpaid
+                    {props.state.payment.paid ? "Paid" : "Unpaid"}
                   </BoldText>
                 </View>
               </View>

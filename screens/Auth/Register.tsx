@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Screen from "../../components/Common/Screen";
 import ContactInput from "../../components/Auth/ContactInput";
 import { Header } from "../../components/Common/Header";
-import { TextInput } from "../../components/Common/Input";
+import { InputText, TextInput } from "../../components/Common/Input";
 import { Map } from "../../components/Common/Map";
 import { BoldText, Text } from "../../components/Common/Text";
 import { OTPInput } from "../../components/Auth/OTPInput";
@@ -79,6 +79,7 @@ export default function Register({
     edit: false,
     storeInfo: {
       name: "",
+      licenseNumber: "",
       address: {
         line1: "",
         location: {
@@ -119,6 +120,7 @@ export default function Register({
       edit: storeData.edit,
       storeInfo: {
         name: storeData.storeInfo.name,
+        licenseNumber: storeData.storeInfo.licenseNumber,
         contact: contact,
         address: storeData.storeInfo.address,
       },
@@ -172,6 +174,7 @@ export default function Register({
               storeInfo: {
                 ...storeData.storeInfo,
                 name: "",
+                licenseNumber: "",
                 address: {
                   ...storeData.storeInfo.address,
                   line1: "",
@@ -259,7 +262,9 @@ export default function Register({
                       variables: {
                         edit: storeData.edit,
                         storeInfo: {
+                          ...storeData.storeInfo,
                           name: storeData.storeInfo.name,
+
                           address: {
                             ...storeData.storeInfo.address,
                             location: {
@@ -279,10 +284,11 @@ export default function Register({
           <>
             <View flex>
               <Text text70>Enter your store details below.</Text>
-
-              <TextInput
+              <InputText
+                placeholder="Eg. Raj Superstore"
+                title="Store Name"
                 value={storeData.storeInfo.name}
-                onChangeText={(text: string) =>
+                onChange={(text: string) =>
                   setStoreData({
                     ...storeData,
                     storeInfo: {
@@ -291,29 +297,25 @@ export default function Register({
                     },
                   })
                 }
-                onBlur={() => setActive(false)}
-                onFocus={() => setActive(true)}
-                style={{
-                  borderWidth: 1,
-                  borderColor: active
-                    ? Colors.$backgroundDarkElevated
-                    : Colors.$backgroundDisabled,
-                  padding: 10,
-                  marginVertical: 10,
-                  borderRadius: 5,
-                }}
-                placeholder="Store Name"
               />
-              {/* <InputText
-                value={storeData.storeInfo.}
+              <InputText
+                value={storeData.storeInfo.licenseNumber}
                 onChange={(text: string) =>
-                  setStoreInfo({ ...storeInfo, licenseNumber: text })
+                  setStoreData({
+                    ...storeData,
+                    storeInfo: { ...storeData.storeInfo, licenseNumber: text },
+                  })
                 }
                 placeholder="ISC000000000"
                 title="License Number"
-                autoFocus={true}
-              /> */}
+              />
             </View>
+            <View flex />
+
+            <Text text70>
+              Note: Your license number will be used to verify your store. It is
+              not stored with us.
+            </Text>
             <Button
               label={"Select Address"}
               disabled={storeData.storeInfo.name.trim().length <= 0}
@@ -381,7 +383,6 @@ export default function Register({
       />
       <Text text70>Join with an unregistered mobile number.</Text>
       <ContactInput
-        error={error}
         contact={contact}
         loading={tfAuthing}
         onNext={() =>
@@ -392,7 +393,12 @@ export default function Register({
             },
           })
         }
-        setContact={(text: string) => setContact({ ...contact, number: text })}
+        setContact={(text: string) => {
+          if (error.error) {
+            setError({ ...error, error: false });
+          }
+          setContact({ ...contact, number: text });
+        }}
       />
       <View flex></View>
       {error.error && (

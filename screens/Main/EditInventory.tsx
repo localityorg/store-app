@@ -112,28 +112,8 @@ function SearchBar(props: ISearch) {
       />
       {props.value.trim().length > 0 && (
         <View row center style={{ backgroundColor: "transparent" }}>
-          <TouchableOpacity
-            onPress={() => props.setValue("")}
-            style={{ marginRight: 15 }}
-          >
+          <TouchableOpacity onPress={() => props.setValue("")}>
             <AntDesign name="close" size={Sizes.icon.normal} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => {
-              // do something
-            }}
-            disabled={props.value.trim().length > 0 ? false : true}
-          >
-            <AntDesign
-              name="arrowright"
-              size={Sizes.icon.normal}
-              color={
-                props.value.trim().length > 0
-                  ? Colors.$iconPrimary
-                  : Colors.$backgroundDisabled
-              }
-            />
           </TouchableOpacity>
         </View>
       )}
@@ -222,21 +202,20 @@ export default function EditInventory({
   const { inventory } = useSelector((state: any) => state.inventoryReducer);
 
   function addToEdited(item: ProductProps) {
-    const items = [...edited];
-    var newItems: Array<ProductProps> = [];
-    var i = items.findIndex((e) => e.id === item.id);
+    let items = [...edited];
+    let i = items.findIndex((e) => e.id === item.id);
+
     if (i <= -1) {
-      newItems = [{ ...item, quantity: { ...item.quantity, units: 1 } }].concat(
+      items = [{ ...item, quantity: { ...item.quantity, units: 1 } }].concat(
         items
       );
     } else {
-      var q = items[i].quantity.units + 1;
-      items.splice(i, 1);
-      newItems = [{ ...item, quantity: { ...item.quantity, units: q } }].concat(
-        items
-      );
+      items[i] = {
+        ...items[i],
+        quantity: { ...items[i].quantity, units: items[i].quantity.units + 1 },
+      };
     }
-    setEdited(newItems);
+    setEdited(items);
   }
 
   function removeFromEdited(item: ProductProps) {

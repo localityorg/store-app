@@ -103,7 +103,9 @@ export default function Login({ navigation }: AuthStackScreenProps<"Login">) {
   return (
     <Screen>
       <Header title="Login" onBack={() => navigation.navigate("Onboarding")} />
-      <Text text70>Welcome back! Login with your registered number.</Text>
+      <Text text70>
+        Welcome back! Login to your store with registered number.
+      </Text>
       <ContactInput
         contact={contact}
         loading={tfAuthing}
@@ -116,7 +118,6 @@ export default function Login({ navigation }: AuthStackScreenProps<"Login">) {
             },
           });
         }}
-        error={error}
         setContact={(text: string) => {
           if (error.error) {
             setError({ error: false, message: "" });

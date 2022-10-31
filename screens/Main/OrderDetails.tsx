@@ -9,12 +9,17 @@ import {
 } from "react-native";
 import { Button, Colors } from "react-native-ui-lib";
 import { useDispatch, useSelector } from "react-redux";
-import { ALTER_DELIVERY, GET_ORDER } from "../../apollo/graphql/Store/orders";
+import {
+  DELIVER_ORDER,
+  DISPATCH_ORDER,
+  GET_ORDER,
+} from "../../apollo/graphql/Store/orders";
 
 import { Header } from "../../components/Common/Header";
 import Screen from "../../components/Common/Screen";
 import { BoldText } from "../../components/Common/Text";
 import OrderCard, { OrderProps } from "../../components/Store/OrderCard";
+import Tracker from "../../components/Store/Tracker";
 import { View } from "../../components/Themed";
 import { setLocation } from "../../redux/Common/actions";
 
@@ -31,7 +36,6 @@ export default function OrderDetails({
   const { location } = useSelector((state: any) => state.locationReducer);
 
   const [permission, setPermission] = useState<string | null>(null);
-  const [dispatched, setDipatched] = useState<boolean | undefined>();
   const [order, setOrder] = useState<OrderProps | undefined>();
 
   const { loading } = useQuery(GET_ORDER, {
@@ -70,26 +74,34 @@ export default function OrderDetails({
     }
   }, [location]);
 
-  useEffect(() => {
-    alter({
-      variables: {
-        id: id,
-        coordinates: location,
-        dispatched: dispatched,
-      },
-    });
-  }, [dispatched]);
-
-  const [alter, { loading: settingDeliveryStatus }] = useMutation(
-    ALTER_DELIVERY,
+  const [deliverOrder, { loading: confirmingDelivery }] = useMutation(
+    DELIVER_ORDER,
     {
       variables: {
         id: id,
         coordinates: location,
-        dispatched: dispatched,
       },
       onCompleted(data) {
-        if (data.alterDeliveryState) {
+        if (data.deliverOrder) {
+        }
+      },
+      onError(error) {
+        Alert.alert(
+          "Cannot change status",
+          `${error.graphQLErrors[0].message}`
+        );
+      },
+    }
+  );
+
+  const [dispatchOrder, { loading: confirmingDispatch }] = useMutation(
+    DISPATCH_ORDER,
+    {
+      variables: {
+        id: id,
+      },
+      onCompleted(data) {
+        if (data.dispatchOrder) {
         }
       },
       onError(error) {
@@ -104,8 +116,8 @@ export default function OrderDetails({
   if (permission !== "granted") {
     return (
       <View flex center>
-        <View width-50 centerH>
-          <BoldText center text70>
+        <View style={{ width: "80%" }} centerH>
+          <BoldText center text70 marginB-10>
             You need to give location access in order to view Order Details
           </BoldText>
           <Button
@@ -134,7 +146,7 @@ export default function OrderDetails({
 
   if (order?.state.cancelled) {
     setTimeout(() => {
-      navigation.navigate("Orders");
+      navigation.navigate("Root");
     }, 2000);
     return (
       <View center flex>
@@ -145,10 +157,11 @@ export default function OrderDetails({
 
   return (
     <Screen>
-      <Header title="Detail" onBack={() => navigation.navigate("Orders")} />
+      <Header title="Detail" onBack={() => navigation.navigate("Root")} />
       <FlatList
         style={{ flex: 1 }}
         data={[1]}
+        extraData={order}
         renderItem={() => (
           <OrderCard
             onPress={() => {}}
@@ -161,30 +174,35 @@ export default function OrderDetails({
         )}
       />
       {!order.state.delivery.delivered && (
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Button
+          label={
+            order.state.delivery.dispatched
+              ? "Deliver  Order"
+              : "Dispatch Order"
+          }
+          disabled={confirmingDispatch || confirmingDelivery}
+          size={Button.sizes.large}
+          backgroundColor={Colors.$backgroundDarkElevated}
+          disabledBackgroundColor={Colors.$iconDisabled}
+          round={false}
+          borderRadius={10}
+          marginT-50
+          marginB-10
           onPress={() =>
             order.state.delivery.dispatched
-              ? setDipatched(false)
-              : setDipatched(true)
+              ? deliverOrder({
+                  variables: {
+                    id: order.id,
+                    coordinates: location,
+                  },
+                })
+              : dispatchOrder({
+                  variables: {
+                    id: order.id,
+                  },
+                })
           }
-          disabled={settingDeliveryStatus}
-          style={{
-            marginVertical: 10,
-            height: 50,
-            width: "100%",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: Colors.$iconPrimary,
-          }}
-        >
-          <BoldText style={{ color: Colors.white }}>
-            {order.state.delivery.dispatched
-              ? "Deliver Order"
-              : "Dispatch Order"}
-          </BoldText>
-        </TouchableOpacity>
+        />
       )}
     </Screen>
   );

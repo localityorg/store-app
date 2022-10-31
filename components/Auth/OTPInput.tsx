@@ -33,7 +33,6 @@ export function OTPInput(props: OTPProps) {
     },
     fetchPolicy: "no-cache",
     onCompleted(data) {
-      console.log(data);
       if (!data.checkAuth.error) {
         props.onNext();
       }
@@ -78,9 +77,6 @@ export function OTPInput(props: OTPProps) {
             color: Colors.$textPrimary,
           }}
           selectionColor={Colors.$textPrimary}
-          onCodeFilled={(code) => {
-            console.log(`Code is ${code}, you are good to go!`);
-          }}
         />
         <ResendOTP
           date={date}
@@ -94,7 +90,7 @@ export function OTPInput(props: OTPProps) {
         label={checkingAuth ? "Confirming" : "Verify"}
         disabled={checkingAuth || secureCode.length < 6}
         size={Button.sizes.large}
-        backgroundColor={Colors.primary}
+        backgroundColor={Colors.$backgroundDarkElevated}
         disabledBackgroundColor={Colors.$iconDisabled}
         round={false}
         borderRadius={10}

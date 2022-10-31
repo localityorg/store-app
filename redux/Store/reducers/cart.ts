@@ -1,92 +1,50 @@
+import { ProductProps } from "../../../components/Store/OrderCard";
 import { ADD_CART_ITEM, REMOVE_CART_ITEM, EMPTY_CART } from "../actions";
 
-var cartState = {
-  tempCart: <any[]>[],
-  cart: <any[]>[
-    {
-      brand: undefined,
-      id: "63417cc5913725fbe999308a",
-      itemQuantity: "1",
-      name: "Britannia Good Day Cashew Cookies",
-      price: { discount: "40.00", mrp: "50.00" },
-      quantity: { count: "200", type: "gm" },
-      totalPrice: "50",
-      url: "ed730342-647f-4a10-ac3f-dcc617e40f81",
-    },
-  ],
-  empty: <boolean>true,
+var cartState: {
+  cart: Array<ProductProps>;
+} = {
+  cart: [],
 };
 
-const sortCart = (cart: any) => {
-  var tempArray: any[] = [];
-  var sortedCart: any[] = [];
-  cart?.forEach((item: any) => {
-    var i = tempArray.findIndex((x) => x.id == item.id);
-    if (i <= -1) {
-      tempArray.push(item);
+function operate(item: ProductProps, cart: Array<ProductProps>, add: boolean) {
+  let arr = [...cart];
+  let i: number = arr.findIndex((p) => p.id === item.id);
+
+  if (i <= -1) {
+    if (add) {
+      arr.push({ ...item, quantity: { ...item.quantity, units: 1 } });
     }
-  });
-  tempArray.map((obj: any) => {
-    const count = cart.filter((e: any) => e.id === obj.id).length;
-
-    const totalItemPrice = count * parseFloat(obj.price.mrp);
-    sortedCart.push({
-      ...obj,
-      itemQuantity: count.toString(),
-      totalPrice: totalItemPrice.toString(),
-    });
-  });
-
-  sortedCart.sort((a, b) => a.id - b.id);
-  return sortedCart;
-};
-
-function addToCart(fetchedData: any) {
-  const itemToAdd = {
-    id: fetchedData.id,
-    name: fetchedData.name,
-    brand: fetchedData.brand,
-    quantity: fetchedData.quantity,
-    url: fetchedData.url,
-    price: fetchedData.price,
-  };
-  cartState.tempCart.push(itemToAdd);
-  const cart = [...cartState.tempCart];
-  return sortCart(cart);
-}
-
-function removeFromCart(fetchedData: any) {
-  const cart = [...cartState.tempCart];
-  if (cart.find((e) => e.id === fetchedData.id) !== undefined) {
-    const indEx = cart.findIndex((e) => e.id === fetchedData.id);
-    cart.splice(indEx, 1);
-    cartState.tempCart = cart;
+  } else {
+    if (add) {
+      arr[i] = {
+        ...cart[i],
+        quantity: { ...cart[i].quantity, units: cart[i].quantity.units + 1 },
+      };
+    } else {
+      let units = cart[i].quantity.units - 1;
+      if (units <= 0) {
+        arr.splice(i, 1);
+      } else {
+        arr[i] = {
+          ...cart[i],
+          quantity: { ...cart[i].quantity, units: units },
+        };
+      }
+    }
   }
-  return sortCart(cart);
-}
-
-function emptyCart() {
-  cartState.tempCart = [];
-  cartState.empty = true;
-  return true;
+  return arr;
 }
 
 export function cartReducer(state: any = cartState, action: any) {
   switch (action.type) {
     case ADD_CART_ITEM:
-      const updatedCart = addToCart(action.payload);
-      if (updatedCart.length > 0) {
-        state.cart.empty = false;
-      }
-      return { ...state, cart: updatedCart };
+      const n = operate(action.payload, state.cart, true);
+      return { ...state, cart: n };
     case REMOVE_CART_ITEM:
-      const newItemCart = removeFromCart(action.payload);
-      if (newItemCart.length === 0) {
-        state.cart.empty = true;
-      }
-      return { ...state, cart: newItemCart };
+      const m = operate(action.payload, state.cart, false);
+      return { ...state, cart: m };
     case EMPTY_CART:
-      emptyCart();
       return { ...state, cart: [] };
     default:
       return state;

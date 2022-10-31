@@ -1,17 +1,17 @@
-import { useEffect, useState } from "react";
-import { TouchableOpacity } from "react-native";
-import * as Location from "expo-location";
 import {
   differenceInDays,
   differenceInHours,
   differenceInMinutes,
   differenceInSeconds,
 } from "date-fns";
+import { useEffect, useState } from "react";
+import { TouchableOpacity } from "react-native";
+import * as Location from "expo-location";
 import { useDispatch } from "react-redux";
 import { Colors } from "react-native-ui-lib";
 
-import { View } from "../Themed";
 import { BoldText, Text } from "../Common/Text";
+import { View } from "../Themed";
 
 import { setLocation } from "../../redux/Common/actions";
 
@@ -78,7 +78,7 @@ const Tracker = (props: TrackerProps): JSX.Element => {
         borderRadius: 10,
         padding: 10,
         borderWidth: 1,
-        borderColor: "#1ea47222",
+        borderColor: Colors.$iconPrimary + "44",
       }}
       disabled={true}
       onPress={() => setTimerView(false)}

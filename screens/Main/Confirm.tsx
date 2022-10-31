@@ -87,11 +87,11 @@ const Confirm = ({ navigation }: RootTabScreenProps<"QuickBill">) => {
       cart.forEach((e: any) => {
         prods.push({
           id: e.id,
-          quantity: parseInt(e.itemQuantity),
+          quantity: parseInt(e.quantity.units),
           inStore: false,
         });
 
-        total += parseFloat(e.totalPrice);
+        total += parseInt(e.quantity.units) * parseFloat(e.price.mrp);
       });
       setProducts(prods);
       setGrandTotal(total.toString());
@@ -148,7 +148,7 @@ const Confirm = ({ navigation }: RootTabScreenProps<"QuickBill">) => {
                     {item.name}
                   </Text>
                   <Text>
-                    {item.itemQuantity} x {item.quantity.count}
+                    {item.quantity.units} x {item.quantity.count}
                     {item.quantity.type}
                   </Text>
                 </View>
@@ -166,6 +166,7 @@ const Confirm = ({ navigation }: RootTabScreenProps<"QuickBill">) => {
       </View>
       <GrandTotalCard
         total={grandTotal}
+        setTotal={(total: string) => setGrandTotal(total)}
         m={method}
         setMethod={setMethod}
         setAccountId={(id: string) => setAccountId}

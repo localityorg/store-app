@@ -73,7 +73,7 @@ export default function QuickBill({
   const [code, setCode] = useState<string>("");
   const [showScanner, setShowScanner] = useState<boolean>(false);
 
-  const { cart, empty } = useSelector((state: any) => state.cartReducer);
+  const { cart } = useSelector((state: any) => state.cartReducer);
   const { store } = useSelector((state: any) => state.storeReducer);
 
   const [searchProduct, { loading }] = useLazyQuery(GET_PRODUCT, {
@@ -315,24 +315,9 @@ export default function QuickBill({
                       />
                     </TouchableOpacity>
                   </View>
-                  <View margin-15 marginH-0 right w-100 spread row>
+                  <View margin-15 marginH-0 row spread>
                     <Button
-                      label={"Discard Changes"}
-                      backgroundColor={Colors.$backgroundDefault}
-                      outlineColor={Colors.$iconNeutral}
-                      labelStyle={{
-                        color: Colors.$iconNeutral,
-                      }}
-                      padding-5
-                      borderRadius={5}
-                      text70
-                      onPress={() => {
-                        setEditProduct(base);
-                        setDialogVisible(false);
-                      }}
-                    />
-                    <Button
-                      label={`${editProduct.id ? "Edit" : "Add"} Product`}
+                      label={`${editProduct.id ? "Edit & Add" : "Add"} Product`}
                       size={Button.sizes.small}
                       backgroundColor={Colors.$backgroundDarkElevated}
                       disabledBackgroundColor={Colors.$iconDisabled}
@@ -342,6 +327,23 @@ export default function QuickBill({
                       text70
                       borderRadius={5}
                       onPress={() => setEditDialog(false)}
+                    />
+                    <Button
+                      label={"Add to Cart"}
+                      backgroundColor={Colors.$backgroundDefault}
+                      outlineColor={Colors.$iconNeutral}
+                      labelStyle={{
+                        color: Colors.$iconNeutral,
+                      }}
+                      padding-5
+                      borderRadius={5}
+                      text70
+                      onPress={() => {
+                        dispatch(addCartItem(editProduct));
+                        setAssignerScreen(false);
+                        setEditProduct(base);
+                        setEditDialog(true);
+                      }}
                     />
                   </View>
                 </View>
@@ -669,7 +671,7 @@ export default function QuickBill({
                       {item.name}
                     </Text>
                     <Text>
-                      {item.itemQuantity} x {item.quantity.count}
+                      {item.quantity.units} x {item.quantity.count}
                       {item.quantity.type}
                     </Text>
                   </View>

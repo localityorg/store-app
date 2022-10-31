@@ -1,3 +1,4 @@
+import { AntDesign } from "@expo/vector-icons";
 import { useState } from "react";
 import {
   Colors,
@@ -6,11 +7,14 @@ import {
   PanningProvider,
   TouchableOpacity,
 } from "react-native-ui-lib";
+import Sizes from "../../constants/Sizes";
+import { TextInput } from "../Common/Input";
 import { BoldText, Text } from "../Common/Text";
 import { View } from "../Themed";
 
 interface IGrandTotalCard {
   total: string;
+  setTotal: any;
   m: string;
   setMethod: any;
   setAccountId: any;
@@ -32,13 +36,12 @@ export default function GrandTotalCard(props: IGrandTotalCard) {
         }}
         ignoreBackgroundPress={false}
       >
-        {/* {toSetAddress.id ? (
         <View spread>
           <View marginT-20 marginH-20>
             <Text $textDefault text60>
-              Confirm
+              Edit Total Amount
             </Text>
-            <View
+            {/* <View
               center
               marginT-10
               style={{
@@ -46,125 +49,52 @@ export default function GrandTotalCard(props: IGrandTotalCard) {
                 width: "100%",
                 backgroundColor: Colors.$backgroundDarkElevated,
               }}
-            />
-            <Text text70 $textDefault marginT-10>
-              Use {toSetAddress.addressInfo?.name.trim()} (
-              {toSetAddress.addressInfo?.line1.trim()}) as your delivery
-              address?
-            </Text>
-            <View margin-15 marginH-0 right w-100 spread row>
-              <Button
-                padding-5
-                paddingL-0
-                text70
-                $textDefault
-                label="Cancel"
-                link
-                onPress={() =>
-                  toSetAddress({
-                    id: null,
-                  })
-                }
-              />
-              <Button
-                label={"Confirm"}
-                size={Button.sizes.small}
-                backgroundColor={Colors.$backgroundDarkElevated}
-                round={false}
-                text70
-                padding-5
-                borderRadius={5}
-                onPress={() => {
-                  dispatch(setDeliveryAddress(toSetAddress));
-                  setToSetAddress({ id: null });
-                  props.setVisible(false);
+            /> */}
+            <View
+              style={{
+                width: "100%",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginVertical: 10,
+                marginBottom: 20,
+              }}
+            >
+              <View
+                style={{
+                  // flex: 1,
+                  width: "80%",
+                  padding: 10,
+                  borderRadius: 10,
+                  backgroundColor: Colors.$backgroundDisabled,
                 }}
-              />
+              >
+                <TextInput
+                  keyboardType="numeric"
+                  placeholder="Grand Total"
+                  value={props.total}
+                  onChangeText={(text: string) => props.setTotal(text)}
+                />
+              </View>
+              <TouchableOpacity
+                style={{
+                  padding: 10,
+                  marginLeft: 10,
+                  borderRadius: 10,
+                  borderWidth: 1,
+                  borderColor: Colors.$backgroundDarkActive,
+                }}
+                onPress={() => setVisible(false)}
+              >
+                <AntDesign
+                  name="check"
+                  size={Sizes.icon.normal}
+                  color={Colors.$backgroundDarkActive}
+                />
+              </TouchableOpacity>
             </View>
           </View>
         </View>
-      ) : (
-        <View spread style={{ maxHeight: Sizes.screen.height / 2 }}>
-          <View marginV-10 marginH-20>
-            <BoldText text70 marginB-10>
-              Pick one from your address book
-            </BoldText>
-            <FlatList
-              data={book}
-              ListFooterComponent={() => (
-                <TouchableOpacity
-                  style={{
-                    height: 45,
-                    width: "100%",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    flexDirection: "row",
-                  }}
-                  onPress={() =>
-                    navigation.navigate("SetAddress", {
-                      set: true,
-                      onNextRoute: "Root",
-                      backDisabled: false,
-                    })
-                  }
-                >
-                  <AntDesign
-                    name="plus"
-                    size={Sizes.icon.small}
-                    color={Colors.$backgroundDarkActive}
-                  />
-                  <Text style={{ fontSize: Sizes.font.text, marginLeft: 10 }}>
-                    Add New Address
-                  </Text>
-                </TouchableOpacity>
-              )}
-              renderItem={({ item }) => (
-                <View
-                  style={{
-                    width: "100%",
-                    padding: 10,
-                    borderRadius: 5,
-                    marginBottom: 10,
-                    backgroundColor: Colors.$iconPrimary + "22",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <TouchableOpacity
-                    style={{
-                      backgroundColor: "transparent",
-                      flexDirection: "column",
-                      alignItems: "flex-start",
-                      minWidth: "50%",
-                      maxWidth: "70%",
-                    }}
-                    activeOpacity={0.7}
-                    onPress={() =>
-                      setToSetAddress({
-                        id: item.id,
-                        addressInfo: {
-                          name: item.name,
-                          line1: item.line1,
-                          location: item.location,
-                        },
-                      })
-                    }
-                  >
-                    <Text>{item.name}</Text>
-                    <Text
-                      style={{ fontSize: Sizes.font.text }}
-                      numberOfLines={1}
-                    >
-                      {item.line1}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            />
-          </View>
-        </View>
-      )} */}
       </Dialog>
       <View
         style={{
@@ -237,17 +167,18 @@ export default function GrandTotalCard(props: IGrandTotalCard) {
             <Text text70>Choose Account</Text>
           </TouchableOpacity>
         </View> */}
-        <View
+        <TouchableOpacity
           style={{
             flexDirection: "row",
             width: "100%",
             alignItems: "center",
             justifyContent: "space-between",
           }}
+          onPress={() => setVisible(true)}
         >
           <Text text60>Grand Total</Text>
           <BoldText text60>₹ {props.total}/-</BoldText>
-        </View>
+        </TouchableOpacity>
       </View>
     </>
   );

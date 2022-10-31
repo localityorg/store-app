@@ -140,16 +140,14 @@ export const ALTER_STATE = gql`
   }
 `;
 
-export const ALTER_DELIVERY = gql`
-  mutation alterDeliveryState(
-    $id: String!
-    $coordinates: [String]!
-    $dispatched: Boolean
-  ) {
-    alterDeliveryState(
-      id: $id
-      coordinates: $coordinates
-      dispatched: $dispatched
-    )
+export const DISPATCH_ORDER = gql`
+  mutation DispatchOrder($id: String!) {
+    dispatchOrder(id: $id)
+  }
+`;
+
+export const DELIVER_ORDER = gql`
+  mutation DeliverOrder($id: String!, $coordinates: [String]!) {
+    deliverOrder(id: $id, coordinates: $coordinates)
   }
 `;
