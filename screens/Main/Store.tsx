@@ -75,20 +75,22 @@ export default function Store({ navigation }: RootTabScreenProps<"Store">) {
   });
 
   useEffect(() => {
-    const unsubscribe = subscribeToStore({
-      document: STORE_UPDATE,
-      variables: { id: user?.id },
-      updateQuery: (prev, { subscriptionData }) => {
-        if (!subscriptionData.data) return prev;
-        const updatedQueryData = subscriptionData.data.storeUpdate;
-        dispatch(setStore(updatedQueryData));
-        return Object.assign({}, prev, {
-          getStore: updatedQueryData,
-        });
-      },
-    });
-    return unsubscribe;
-  }, []);
+    if (user?.id) {
+      const unsubscribe = subscribeToStore({
+        document: STORE_UPDATE,
+        variables: { id: user.id },
+        updateQuery: (prev, { subscriptionData }) => {
+          if (!subscriptionData.data) return prev;
+          const updatedQueryData = subscriptionData.data.storeUpdate;
+          dispatch(setStore(updatedQueryData));
+          return Object.assign({}, prev, {
+            getStore: updatedQueryData,
+          });
+        },
+      });
+      return unsubscribe;
+    }
+  }, [user]);
 
   useEffect(() => {
     if (inventoryId) {

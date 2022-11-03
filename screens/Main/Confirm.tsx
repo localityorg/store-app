@@ -54,6 +54,16 @@ const Confirm = ({ navigation }: RootTabScreenProps<"QuickBill">) => {
     },
     onError(error) {
       console.log({ ...error });
+      console.log({
+        products: products,
+        grandTotal: grandTotal,
+        addressId: null,
+        storeId: store.id,
+        delivery,
+        deliverBy: new Date().toISOString(),
+        accountId,
+        method,
+      });
       Alert.alert(
         "Error occured",
         "We could not register this order. Try again in some time."
@@ -83,17 +93,16 @@ const Confirm = ({ navigation }: RootTabScreenProps<"QuickBill">) => {
       navigation.navigate("QuickBill");
     } else {
       var total = 0;
-      const prods: Array<any> = [];
       cart.forEach((e: any) => {
-        prods.push({
-          id: e.id,
-          quantity: parseInt(e.quantity.units),
-          inStore: false,
-        });
+        // prods.push({
+        //   id: e.id,
+        //   quantity: parseInt(e.quantity.units),
+        //   inStore: false,
+        // });
 
         total += parseInt(e.quantity.units) * parseFloat(e.price.mrp);
       });
-      setProducts(prods);
+      setProducts(cart);
       setGrandTotal(total.toString());
     }
   }, [cart]);

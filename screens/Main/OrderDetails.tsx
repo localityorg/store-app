@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@apollo/client";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
 import {
@@ -19,6 +19,7 @@ import { Header } from "../../components/Common/Header";
 import Screen from "../../components/Common/Screen";
 import { BoldText } from "../../components/Common/Text";
 import OrderCard, { OrderProps } from "../../components/Store/OrderCard";
+import OrderStateButtons from "../../components/Store/OrderStateButtons";
 import Tracker from "../../components/Store/Tracker";
 import { View } from "../../components/Themed";
 import { setLocation } from "../../redux/Common/actions";
@@ -38,7 +39,9 @@ export default function OrderDetails({
   const [permission, setPermission] = useState<string | null>(null);
   const [order, setOrder] = useState<OrderProps | undefined>();
 
-  const { loading } = useQuery(GET_ORDER, {
+  const { orders } = useSelector((state: any) => state.ordersReducer);
+
+  const [fetch, { loading }] = useLazyQuery(GET_ORDER, {
     variables: {
       id: id,
     },
@@ -49,6 +52,12 @@ export default function OrderDetails({
       console.log({ ...error });
     },
   });
+
+  useEffect(() => {
+    if (orders) {
+      setOrder(orders.find((order: OrderProps) => order.id === id));
+    }
+  }, [orders, id]);
 
   const askForLocationPermission = () => {
     (async () => {
@@ -173,37 +182,7 @@ export default function OrderDetails({
           />
         )}
       />
-      {!order.state.delivery.delivered && (
-        <Button
-          label={
-            order.state.delivery.dispatched
-              ? "Deliver  Order"
-              : "Dispatch Order"
-          }
-          disabled={confirmingDispatch || confirmingDelivery}
-          size={Button.sizes.large}
-          backgroundColor={Colors.$backgroundDarkElevated}
-          disabledBackgroundColor={Colors.$iconDisabled}
-          round={false}
-          borderRadius={10}
-          marginT-50
-          marginB-10
-          onPress={() =>
-            order.state.delivery.dispatched
-              ? deliverOrder({
-                  variables: {
-                    id: order.id,
-                    coordinates: location,
-                  },
-                })
-              : dispatchOrder({
-                  variables: {
-                    id: order.id,
-                  },
-                })
-          }
-        />
-      )}
+      <OrderStateButtons order={order} />
     </Screen>
   );
 }

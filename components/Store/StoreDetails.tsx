@@ -5,7 +5,7 @@ import { Alert, Keyboard } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useMutation } from "@apollo/client";
 
-import { TextInput } from "../../components/Common/Input";
+import { InputText, TextInput } from "../../components/Common/Input";
 import { Map } from "../../components/Common/Map";
 import { Text } from "../../components/Common/Text";
 import Screen from "../../components/Common/Screen";
@@ -27,6 +27,7 @@ const StoreDetails = (props: DetailProps): JSX.Element => {
     (state: any) => state.locationReducer
   );
   const { store } = useSelector((state: any) => state.storeReducer);
+  const { location } = useSelector((state: any) => state.locationReducer);
   const { user } = useSelector((state: any) => state.userReducer);
 
   const [locationSet, setLocationSet] = useState<boolean>(false);
@@ -58,6 +59,7 @@ const StoreDetails = (props: DetailProps): JSX.Element => {
     storeInfo: {
       name: store.name,
       contact: user.contact,
+      licenseNumber: "",
       address: {
         line1: store.address.line,
         location: {
@@ -69,12 +71,7 @@ const StoreDetails = (props: DetailProps): JSX.Element => {
 
   const [editStore, { loading: confirming }] = useMutation(EDIT_STORE, {
     variables: {
-      edit: data.edit,
-      storeInfo: {
-        name: data.storeInfo.name,
-        contact: user.contact,
-        address: data.storeInfo.address,
-      },
+      ...data,
     },
     onCompleted(data) {
       if (data.editStore) {
@@ -85,11 +82,20 @@ const StoreDetails = (props: DetailProps): JSX.Element => {
       }
     },
     onError(error) {
+      console.log({
+        edit: data.edit,
+        storeInfo: {
+          name: data.storeInfo.name,
+          contact: user.contact,
+          address: data.storeInfo.address,
+        },
+      });
+      console.log(location);
       Alert.alert(
         "Request not sucessful",
         "Maybe you forgot to change values or some values were incorrect. Try again in some time!"
       );
-      props.onNext();
+      // props.onNext();
     },
   });
 
@@ -184,9 +190,13 @@ const StoreDetails = (props: DetailProps): JSX.Element => {
                   variables: {
                     edit: data.edit,
                     storeInfo: {
-                      name: data.storeInfo.name,
-                      address: data.storeInfo.address,
-                      contact: user.contact,
+                      ...data.storeInfo,
+                      address: {
+                        ...data.storeInfo.address,
+                        location: {
+                          coordinates: location,
+                        },
+                      },
                     },
                   },
                 })
@@ -201,7 +211,10 @@ const StoreDetails = (props: DetailProps): JSX.Element => {
   return (
     <>
       <View flex>
-        <Text text70>Enter your store details below.</Text>
+        <Text text70 marginB-10>
+          Enter your store details below. Please note you will require your
+          Store's license number to edit store everytime.
+        </Text>
         {/* <InputText
             value={storeInfo.licenseNumber}
             onChange={(text: string) =>
@@ -222,9 +235,9 @@ const StoreDetails = (props: DetailProps): JSX.Element => {
             }}
           /> */}
 
-        <TextInput
+        <InputText
           value={data.storeInfo.name}
-          onChangeText={(text: string) =>
+          onChange={(text: string) =>
             setData({
               ...data,
               storeInfo: {
@@ -233,32 +246,30 @@ const StoreDetails = (props: DetailProps): JSX.Element => {
               },
             })
           }
-          onBlur={() => setActive(false)}
-          onFocus={() => setActive(true)}
-          style={{
-            borderWidth: 1,
-            borderColor: active
-              ? Colors.$backgroundDarkElevated
-              : Colors.$backgroundDisabled,
-            padding: 10,
-            marginVertical: 10,
-            borderRadius: 5,
-          }}
-          placeholder="Store Name"
+          title="Store Name"
+          placeholder={data.storeInfo.name}
         />
-        {/* <InputText
-                value={storeData.storeInfo.}
-                onChange={(text: string) =>
-                  setStoreInfo({ ...storeInfo, licenseNumber: text })
-                }
-                placeholder="ISC000000000"
-                title="License Number"
-                autoFocus={true}
-              /> */}
+        <InputText
+          value={data.storeInfo.licenseNumber}
+          onChange={(text: string) =>
+            setData({
+              ...data,
+              storeInfo: {
+                ...data.storeInfo,
+                licenseNumber: text,
+              },
+            })
+          }
+          title="License Number"
+          placeholder={"ISB000999999"}
+        />
       </View>
       <Button
         label={"Select Address"}
-        disabled={data.storeInfo.name.trim().length <= 0}
+        disabled={
+          data.storeInfo.name.trim().length <= 0 ||
+          data.storeInfo.licenseNumber.trim().length <= 9
+        }
         size={Button.sizes.large}
         backgroundColor={Colors.$backgroundDarkElevated}
         disabledBackgroundColor={Colors.$iconDisabled}

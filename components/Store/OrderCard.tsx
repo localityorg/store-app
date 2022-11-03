@@ -28,13 +28,17 @@ export interface ProductProps {
     mrp: string;
   };
   url: string;
-  itemQuantity?: number;
+  totalAmount?: string;
 }
 
 export interface OrderProductProps {
   id: string;
   name: string;
-  quantity: string;
+  quantity: {
+    units: number;
+    count: string;
+    type: string;
+  };
   url: string;
   totalAmount: string;
 }
@@ -141,7 +145,7 @@ const ProductList = (props: ProductListProps): JSX.Element => {
                 fontSize: props.card ? Sizes.font.text : 16,
               }}
             >
-              x{item.quantity.toString()}
+              x{item.quantity.units.toString()}
             </Text>
             <Text
               style={{
@@ -156,8 +160,7 @@ const ProductList = (props: ProductListProps): JSX.Element => {
     />
   );
 };
-
-const GrandTotalDeliveryCard = (
+export const GrandTotalDeliveryCard = (
   props: GrandTotalDeliveryProps
 ): JSX.Element => {
   return (
@@ -177,11 +180,15 @@ const GrandTotalDeliveryCard = (
           justifyContent: "space-between",
         }}
       >
-        <View style={{ flexDirection: "column", alignItems: "flex-start" }}>
+        <View
+          style={{
+            flexDirection: "column",
+            alignItems: "flex-start",
+            width: "70%",
+          }}
+        >
           <BoldText>Address</BoldText>
-          <Text numberOfLines={1} text70 style={{ width: "100%" }}>
-            {props.address?.line || "In Store"}
-          </Text>
+          <Text numberOfLines={2}>{props.address.line || "In Store"}</Text>
         </View>
         <View
           style={{
@@ -201,7 +208,7 @@ const GrandTotalDeliveryCard = (
         }}
       >
         <BoldText>Grand Total</BoldText>
-        <Text text70>₹ {props.grandTotal}/-</Text>
+        <Text>Rs. {props.grandTotal}/-</Text>
       </View>
     </View>
   );

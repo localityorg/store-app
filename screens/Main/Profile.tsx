@@ -11,7 +11,7 @@ import { BoldText, Text } from "../../components/Common/Text";
 import { View } from "../../components/Themed";
 import useColorScheme from "../../hooks/useColorScheme";
 import { removeUser } from "../../redux/Common/actions";
-import { setStore } from "../../redux/Store/actions";
+import { setInventory, setStore } from "../../redux/Store/actions";
 
 import { RootStackScreenProps } from "../../types";
 
@@ -27,6 +27,7 @@ export default function Profile({
   function handleLogout() {
     dispatch(removeUser());
     dispatch(setStore(null));
+    dispatch(setInventory({ id: "", products: [] }));
   }
 
   if ((store || user) === null) {

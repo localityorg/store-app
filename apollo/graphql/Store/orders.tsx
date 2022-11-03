@@ -7,7 +7,11 @@ export const GET_ORDER = gql`
       products {
         name
         url
-        quantity
+        quantity {
+          units
+          count
+          type
+        }
         totalAmount
       }
       state {
@@ -49,7 +53,11 @@ export const GET_ORDERS = gql`
       products {
         name
         url
-        quantity
+        quantity {
+          units
+          count
+          type
+        }
         totalAmount
       }
       state {
@@ -91,7 +99,11 @@ export const GET_NEW_ORDER = gql`
       products {
         name
         url
-        quantity
+        quantity {
+          units
+          count
+          type
+        }
         totalAmount
       }
       state {
@@ -149,5 +161,11 @@ export const DISPATCH_ORDER = gql`
 export const DELIVER_ORDER = gql`
   mutation DeliverOrder($id: String!, $coordinates: [String]!) {
     deliverOrder(id: $id, coordinates: $coordinates)
+  }
+`;
+
+export const ORDER_PAID = gql`
+  mutation PaidOrder($id: String!, $method: String!) {
+    paymentStatus(id: $id, method: $method)
   }
 `;

@@ -13,13 +13,19 @@ function operate(item: ProductProps, cart: Array<ProductProps>, add: boolean) {
 
   if (i <= -1) {
     if (add) {
-      arr.push({ ...item, quantity: { ...item.quantity, units: 1 } });
+      arr.push({
+        ...item,
+        quantity: { ...item.quantity, units: 1 },
+        totalAmount: item.price.mrp,
+      });
     }
   } else {
     if (add) {
+      let units = cart[i].quantity.units + 1;
       arr[i] = {
         ...cart[i],
-        quantity: { ...cart[i].quantity, units: cart[i].quantity.units + 1 },
+        quantity: { ...cart[i].quantity, units },
+        totalAmount: (parseFloat(item.price.mrp) * units).toString(),
       };
     } else {
       let units = cart[i].quantity.units - 1;
@@ -29,6 +35,7 @@ function operate(item: ProductProps, cart: Array<ProductProps>, add: boolean) {
         arr[i] = {
           ...cart[i],
           quantity: { ...cart[i].quantity, units: units },
+          totalAmount: (parseFloat(item.price.mrp) * units).toString(),
         };
       }
     }
